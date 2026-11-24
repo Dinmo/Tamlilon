@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson Maker</title>
+<style>
+:root{
+  --bg:#fbfaf6; --ink:#1d1d1f; --muted:#6b6b70; --line:#e2dfd6; --panel:#ffffff;
+  --hl:#ffe9a8; --done:#8a8a8f; --accent:#2f5d8a; --green:#2f7d4f; --attn:#c62828; --warn-bg:#fff4e5;
+  --fs:26px; --cfs:40px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+body{display:flex;flex-direction:column}
+.ui,header,#panel,#modal,.step,#banner,#editbar,#toast{font-family:Arial,"Segoe UI",Helvetica,sans-serif}
+[dir=auto]{unicode-bidi:plaintext}
+/* Hebrew notes (even with French words inside) and a right-to-left text read in the right order, starting on the right */
+ul.notes li,.doc .box > div,#text p,#ctext p,#panel .fr{unicode-bidi:plaintext;text-align:start}
+body.ro .noro,.onlyro{display:none} body.ro .onlyro{display:block}
+button{font:inherit;cursor:pointer}
+kbd{font:12px Menlo,Consolas,monospace;border:1px solid #ccc;border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff;color:var(--ink)}
+header{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;margin:0;font-family:Georgia,serif}
+header .tools{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:14px}
+header button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 11px;font-size:15px}
+header .tools button.on{background:var(--ink);color:#fff}
+#saveb.dirty{background:#fff1d6;border-color:#e0a32e;font-weight:bold}
+#projdot{color:#aaa} #projdot.on{color:var(--green)}
+nav#tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+nav#tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+nav#tabs button[draggable=true]{cursor:grab}
+nav#tabs button.dragging{opacity:.4}
+nav#tabs button.dropL{box-shadow:-4px 0 0 var(--accent)}
+nav#tabs button.dropR{box-shadow:4px 0 0 var(--accent)}
+nav#tabs .tabx{margin-left:6px;padding:0 5px;color:var(--attn)}
+#addtab{font-weight:bold;color:var(--accent)}
+#banner{display:none;flex:none;background:var(--warn-bg);border-bottom:1px solid #f0c98a;padding:8px 16px;font-size:15px;gap:10px;align-items:center;flex-wrap:wrap}
+#banner.on{display:flex}
+#banner button{border:1px solid #d9a24a;background:#fff;border-radius:7px;padding:3px 10px}
+#editbar{display:none;flex:none;background:#fff8e1;border-bottom:1px solid #f0d58a;padding:7px 16px;font-size:15px;gap:10px;align-items:center;flex-wrap:wrap}
+body.editing #editbar{display:flex}
+#editbar button{border:1px solid #d9b95a;background:#fff;border-radius:6px;padding:3px 12px;font-weight:bold}
+main{flex:1;min-height:0}
+.view{display:none;height:100%}
+.view.on{display:flex}
+/* reading */
+#text{flex:1 1 58%;overflow-y:auto;padding:24px 40px 40vh 40px;font-size:var(--fs);line-height:1.75}
+#text p{margin:0 0 .9em 0;text-indent:1.5em}
+.empty{font-family:Arial,sans-serif;font-size:18px;color:var(--muted);text-indent:0;padding:40px 0}
+.empty button{border:1px solid var(--accent);color:var(--accent);background:#fff;border-radius:8px;padding:6px 14px;font-size:16px}
+.s{border-radius:6px;padding:1px 2px;cursor:pointer;transition:background .15s}
+.s:hover{background:#f1efe7}
+.s.read{color:var(--done)}
+.s.cur{background:var(--hl);color:var(--ink);box-shadow:0 0 0 2px #f3d67a}
+.s .num{display:none;font-family:Arial,sans-serif;font-size:.5em;color:var(--accent);vertical-align:super;margin-right:2px}
+body.nums .s .num{display:inline}
+.w{border-radius:3px}
+.w:hover{background:#cfe2f5;color:#000}
+body.editing .w{cursor:text}
+body.editing .w:hover{outline:2px dashed #d9b95a}
+.w.spot{background:var(--accent);color:#fff;border-radius:4px;padding:0 2px}
+#panel{flex:1 1 42%;max-width:720px;border-left:1px solid var(--line);background:var(--panel);overflow-y:auto;padding:18px 22px;font-size:calc(var(--fs)*.72)}
+#panel .fr{font-family:Georgia,serif;font-size:calc(var(--fs)*.85);line-height:1.5;margin:6px 0 10px}
+.meta{color:var(--muted);font-size:.8em}
+.navrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.navrow button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 14px;font-size:1em}
+.sec{border-top:1px solid var(--line);padding:12px 0;display:none}
+.sec.on{display:block}
+body.editing .sec{display:block}
+.sec h3{margin:0 0 8px;font-size:.8em;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:8px}
+.trl{margin:0 0 10px}
+.lab{display:block;color:var(--muted);font-size:.7em;text-transform:uppercase;letter-spacing:.05em}
+.trt{font-size:1.1em;line-height:1.55}
+ul.notes{list-style:none;padding:0;margin:0}
+ul.notes li{margin:0 0 10px;line-height:1.45}
+.tag{display:inline-block;font-size:.72em;border-radius:4px;padding:1px 6px;margin-right:6px;color:#fff;vertical-align:1px;background:#888;font-family:Arial,sans-serif}
+.tag.expr{background:#2f5d8a}.tag.ety{background:#5b7f3a}.tag.q{background:#a3472f}.tag.ctx{background:#7a5a96}.tag.gram{background:#b07d12}.tag.rem{background:#777}
+.reveal{border:1px solid #cfdceb;background:#f3f7fb;border-radius:10px;padding:8px 10px;margin:6px 0 12px;font-size:.85em}
+.reveal .rr,.reveal .rh{display:grid;grid-template-columns:1fr 64px 64px;align-items:center;gap:6px;margin:4px 0}
+.reveal .rh{color:var(--muted);font-size:.8em;text-align:center}
+.reveal .rh span:first-child{text-align:left}
+.reveal button{border:1px solid #cfdceb;background:#fff;border-radius:7px;padding:3px 0}
+.reveal button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.reveal button.cl.on{background:var(--green);border-color:var(--green)}
+.reveal kbd{margin-left:4px}
+.reveal .wordrow{margin-top:6px;color:var(--muted)}
+.reveal .wordrow button{border:1px solid #cfdceb;background:#fff;border-radius:6px;padding:0 8px}
+.ed{display:none;border:1px solid #d9b95a;background:#fff8e1;color:#7a5a00;border-radius:6px;font-size:13px;padding:2px 9px;font-family:Arial,sans-serif;text-transform:none;letter-spacing:0;font-weight:normal}
+body.editing .ed{display:inline-block}
+/* tooltip */
+#tip{position:fixed;z-index:20;display:none;background:#1d1d1f;color:#fff;border-radius:10px;padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:calc(var(--fs)*.68);max-width:460px;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none;line-height:1.4}
+#tip .tw{font-family:Georgia,serif;font-size:1.15em;font-weight:bold}
+#tip .tl{margin:3px 0}
+#tip .tl small{color:#aab;font-size:.7em;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+#tip .tp{color:#cfd8e3}
+#tip .tn{color:#f3d67a;font-size:.85em;margin-top:4px}
+#tip .tm{color:#f3a9a9}
+/* doc views (setup, words, your tabs) */
+.doc{overflow-y:auto;width:100%;padding:24px 40px 80px;font-size:calc(var(--fs)*.8);line-height:1.6}
+.doc .inner{max-width:1000px;margin:0 auto}
+.doc h2{font-size:1.5em;margin:.2em 0 .4em}
+.doc h3{font-size:1.1em;margin:0 0 .4em;color:var(--accent);display:flex;gap:10px;align-items:center}
+.doc .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 22px;margin:14px 0}
+.doc .hid{display:none;border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+.doc .hid.on{display:block}
+.doc .hid.ans{background:#f3f7fb;border-left:4px solid var(--accent);padding:6px 12px}
+.doc button.show{border:1px solid var(--line);background:#fff;border-radius:6px;font-size:.75em;padding:2px 10px;font-family:Arial,sans-serif}
+.doc a{color:var(--accent);cursor:pointer;text-decoration:underline}
+/* setup */
+#setup{font-family:Arial,"Segoe UI",sans-serif;font-size:17px;line-height:1.5}
+.welcome{background:#eef4fa;border:1px solid #cfdceb;border-radius:12px;padding:10px 16px;margin-bottom:10px}
+.welcome button,.btnrow button,.howto button,#setup details button{border:1px solid #bbb;background:#fff;border-radius:8px;padding:6px 14px;font-size:16px}
+#setup button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:bold}
+.step{display:flex;gap:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:14px 0}
+.step.dim{opacity:.55}
+.step .sn{flex:none;width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;font-weight:bold;font-size:20px;display:flex;align-items:center;justify-content:center}
+.step .sb{flex:1;min-width:0}
+.step h3{margin:4px 0 8px;font-size:20px;color:var(--ink)}
+.step p{margin:6px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 18px}
+.grid label{display:block;font-weight:bold;font-size:15px}
+.checks{font-size:15px}.checks b{display:block}.checks .help{color:var(--muted);font-size:13px}
+.checks label{display:flex;align-items:center;gap:6px;font-weight:normal;font-size:16px;margin:3px 0;cursor:pointer}
+.checks input{width:18px;height:18px;margin:0}
+.grid input:not([type=checkbox]),.grid select{display:block;width:100%;margin-top:4px;font:17px Arial,sans-serif;padding:7px 9px;border:1px solid #bbb;border-radius:8px;background:#fff}
+#setup textarea{width:100%;font:17px/1.55 Georgia,serif;border:1px solid #bbb;border-radius:8px;padding:10px 12px}
+.btnrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.msg{font-size:15px}
+.msg.good,.ok{color:var(--green);font-weight:bold}
+.msg.bad{color:var(--attn);font-weight:bold}
+.prog{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;align-items:center;margin:4px 0 12px;font-size:16px}
+.bar{height:14px;background:#eee;border-radius:7px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green)}
+.howto li{margin:6px 0}
+/* words table */
+table.wt{border-collapse:collapse;width:100%;font-size:.9em}
+table.wt th{text-align:left;font:bold 13px Arial,sans-serif;color:var(--muted);border-bottom:2px solid var(--line);padding:4px 8px}
+table.wt td{border-bottom:1px solid var(--line);padding:4px 8px;vertical-align:top}
+table.wt td.wf{font-weight:bold}
+table.wt tr.miss td.wf::after{content:" missing";color:var(--attn);font:12px Arial,sans-serif;font-weight:normal}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+#modal.on{display:flex}
+#modal .card{background:#fff;border-radius:12px;max-width:860px;width:100%;padding:18px 22px;font-size:16px;line-height:1.45;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+#modal h2{margin:0 0 10px;font-size:20px}
+#modal h3{margin:18px 0 6px;font-size:17px;color:var(--accent)}
+#modal label{display:block;font-weight:bold;margin:12px 0 4px}
+#modal .help{font-weight:normal;color:var(--muted);font-size:13px;margin-left:6px}
+#modal textarea,#modal input[type=text]{width:100%;font:16px/1.45 Arial,sans-serif;border:1px solid #bbb;border-radius:6px;padding:7px 9px}
+#modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#modal .row button{border:1px solid #bbb;background:#fff;border-radius:8px;padding:7px 16px}
+#modal .row button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:bold}
+#modal .row button.danger{color:var(--attn);border-color:var(--attn);margin-right:auto}
+#modal .src{font-family:Georgia,serif;font-size:18px;background:#f6f5f1;border-radius:8px;padding:8px 12px}
+#modal table{border-collapse:collapse} #modal td{padding:3px 10px 3px 0;vertical-align:top}
+.ncard{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0;background:#fcfcfa}
+.nhead{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.nhead select{font:15px Arial,sans-serif;padding:3px 6px;border-radius:6px}
+.nhead button{border:1px solid #ccc;background:#fff;border-radius:6px;padding:2px 9px;min-width:32px}
+.nhead .sp{flex:1}
+.presets,.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.presets button{border:1px solid #cfdceb;background:#f3f7fb;border-radius:8px;padding:6px 12px}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:2px 10px;font-family:Georgia,serif}
+.lab2{font-weight:bold;margin-top:14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1d1f;color:#fff;border-radius:10px;padding:10px 18px;font-size:16px;z-index:40;display:none;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+/* class (projector) window */
+#classview{display:none}
+body.classmode header,body.classmode #banner,body.classmode #editbar,body.classmode main,body.classmode #tip{display:none}
+body.classmode #classview{display:flex;flex-direction:column;height:100vh}
+#ctext{flex:1;overflow-y:auto;padding:5vh 7vw 35vh;font-size:var(--cfs);line-height:1.7}
+#ctext p{margin:0 0 .8em;text-indent:1.5em}
+#ctext .s{cursor:default}
+#ctext .s:not(.cur):hover{background:none}
+#cbar{background:#fff;border-top:3px solid var(--line);padding:1.2vh 7vw 2vh;font-family:Arial,Helvetica,sans-serif;font-size:calc(var(--cfs)*.6);line-height:1.45;max-height:42vh;overflow-y:auto}
+#cbar:empty{display:none}
+#cbar .row{margin:.3em 0}
+#cbar .lab{display:inline;margin-right:.6em}
+#cbar .ctr{font-size:1.1em}
+#cbar .ctr+.ctr{color:#555;font-size:.9em}
+#cbar ul.notes li{margin:.25em 0}
+#cbar .cw{font-size:1.15em;background:#eef4fa;border-radius:10px;padding:.2em .6em;display:inline-block}
+#cbar .cw b{font-family:Georgia,serif}
+#cbar .etr{color:#555;font-size:.85em}
+#ctools{position:fixed;top:8px;right:10px;opacity:.25;font-family:Arial,sans-serif;font-size:13px;display:flex;gap:8px;align-items:center;z-index:11}
+#ctools:hover,#ctools.warn{opacity:1}
+#ctools button{border:1px solid #ccc;background:#fff;border-radius:6px;padding:3px 8px}
+#cstat{color:#a33;font-size:18px}
+@media (max-width:900px){.view.on{flex-direction:column}#panel{max-width:none;border-left:0;border-top:1px solid var(--line)}#text{padding:16px 16px 20vh}.doc{padding:16px}}
+@media print{header,#banner,#editbar,#panel,.ed,#tip{display:none!important}main,.view.on{display:block;height:auto}#text{overflow:visible;padding:0}.doc{overflow:visible}
+  .s,.s.read,.s.cur{color:#000!important;background:none!important;box-shadow:none!important}.w.spot{background:none!important;color:inherit!important;padding:0!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="ptitle">Lesson Maker</h1><button class="ed" id="edtitle" title="Change the title">✎</button>
+  <nav id="tabs"></nav>
+  <div class="tools">
+    <button id="fsm" title="Smaller text (−)">A−</button><button id="fsp" title="Bigger text (+)">A+</button>
+    <button id="numb" title="Show / hide sentence numbers (#)">#</button>
+    <button id="projb" title="Open the class screen, for the projector">📽 Class screen <span id="projdot">○</span></button>
+    <button id="saveb" title="Save the lesson as a file">💾 Save</button>
+    <button id="pkgb" title="Make a read-only copy to send to someone else">📦 Package</button>
+    <button id="editb" title="Edit mode (E)">✎ Edit</button>
+    <button id="helpb" title="Step-by-step guide (?)">? Guide</button>
+  </div>
+</header>
+<div id="banner"></div>
+<div id="editbar">✎ <b>Editing is on.</b> Click any word to change its pop-up, or a yellow ✎ button. Double-click a tab to rename it. <button id="editdone">✓ Done editing</button></div>
+<main>
+  <section class="view" id="v-read"><div id="text"></div><aside id="panel"></aside></section>
+  <section class="view" id="v-words"><div class="doc"><div class="inner" id="words"></div></div></section>
+  <section class="view" id="v-setup"><div class="doc"><div class="inner" id="setup"></div></div></section>
+</main>
+<div id="classview">
+  <div id="ctext"></div>
+  <div id="cbar"></div>
+  <div id="ctools"><span id="cstat"></span><button id="cfs" title="Full screen (F)">⛶ Full screen</button></div>
+</div>
+<div id="tip"></div>
+<div id="toast"></div>
+<div id="modal"><div class="card" id="mcard"></div></div>
+
+<!-- The lesson itself (text, translations, notes, tabs). Empty in the blank tool; filled in when you click 💾 Save. -->
+<script id="lesson-data" type="application/json">null</script>
+<script>
+(function(){
+"use strict";
+// Copy of this page exactly as it was loaded, before anything is drawn: 💾 Save and 📦 Package write it back out
+// with the current lesson inside the "lesson-data" block above.
+const SNAP = document.documentElement.outerHTML;
+const DATA_RX = /(<script id="lesson-data" type="application\/json">)[\s\S]*?(<\/script>)/;
+const CLASS = new URLSearchParams(location.search).get("view")==="class";   // projector ("class") window?
+let FILE=null; try{ FILE=JSON.parse(document.getElementById("lesson-data").textContent||"null"); }catch(e){}
+const RO = !!(FILE && FILE.readonly);                                        // 📦 package: read-only
+
+// ---------------------------------------------------------------- helpers
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+          set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},
+          del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=k=>String(k||"").normalize("NFC").toLowerCase().replace(/[’‘ʼ׳]/g,"'").replace(/״/g,'"');
+// A word = letters, possibly joined by an apostrophe or hyphen (l'eau, aujourd'hui, peut-être): any alphabet.
+// In Hebrew also the maqaf (בית־ספר) and the geresh / gershayim of acronyms (ד"ר, צה״ל).
+const WRX=/\p{L}[\p{L}\p{M}\p{N}]*(?:(?:['’ʼ\-‐־]|["׳״](?=\p{Script=Hebrew}))[\p{L}\p{M}\p{N}]+)*/gu;   // digits stay inside a word (S1ck, B12)
+const toks=t=>(String(t).match(WRX)||[]).map(norm);
+// Simple formatting for notes and tab texts: **bold**, *italic*, line breaks. No HTML needed.
+const md=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>").replace(/\n/g,"<br>");
+function toast(msg,ms){ const t=$("toast"); t.textContent=msg; t.style.display="block"; clearTimeout(toast.h); toast.h=setTimeout(()=>t.style.display="none",ms||3500); }
+function download(text,name,type){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type}));
+  a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }catch(e){}
+  const ta=document.createElement("textarea"); ta.value=t; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+  let ok=false; try{ ok=document.execCommand("copy"); }catch(e){} ta.remove(); return ok;
+}
+const fname=t=>(String(t||"").replace(/[\\/:*?"<>|]+/g,"").trim().slice(0,60)||"My lesson");
+
+// ---------------------------------------------------------------- the lesson
+// sents: [{t: text, np: starts a new paragraph, tr: [translation per language], n: [[note type, note text]]}]
+// words: {"word": {tr: [meaning per language], p: {"English": pronunciation in English letters, "Hebrew": …}, n: note}}
+// pron: the alphabets in which to give pronunciations, e.g. ["English","Hebrew"]; [] = none
+function blank(){ return {v:1,id:"L"+Date.now().toString(36)+Math.random().toString(36).slice(2,7),t:0,title:"",src:"French",langs:["Hebrew","English"],
+  pron:["English"],batch:0,sents:[],words:{},tabs:{order:null,titles:{},custom:{},archived:{}},removed:[]}; }
+function fix(x){ const b=blank(); for(const k in b) if(x[k]==null) x[k]=b[k];
+  if(x.batch===15) x.batch=0;                                    // 15 was the old default; 0 = whole text
+  x.tabs=Object.assign(blank().tabs,x.tabs);
+  if(!Array.isArray(x.pron)){                                    // older lessons: "en" / "l1" / "none" and one pronunciation per word
+    const one=x.pron=="l1"?x.langs[0]:"English"; x.pron=x.pron=="none"?[]:[one];
+    Object.values(x.words).forEach(w=>{ if(typeof w.p!=="object"||!w.p) w.p=w.p?{[one]:w.p}:{}; }); }
+  Object.values(x.words).forEach(w=>{ if(typeof w.p!=="object"||!w.p) w.p={}; });
+  x.sents.forEach(s=>{ s.tr=s.tr||[]; s.n=s.n||[]; }); return x; }
+// Alphabets offered for pronunciation: English and each translation language. PR() = the ones ticked in step 1.
+const pronChoices=()=>["English",...L.langs].filter((c,i,a)=>c&&a.findIndex(x=>x.toLowerCase()==c.toLowerCase())==i);
+const PR=()=>(L.pron||[]).filter(s=>pronChoices().some(c=>c.toLowerCase()==s.toLowerCase()));
+const pronVals=g=>PR().map(sc=>((g&&g.p)||{})[sc]||"");
+let L, savedT=0, BANNER=null;
+if(FILE && FILE.lesson){
+  L=fix(FILE.lesson); savedT=L.t;
+  const loc=!RO && !CLASS && ls.get("lm:"+L.id,null);
+  if(loc && loc.t>L.t){ BANNER={kind:"local",fileL:L}; L=fix(loc); }
+}else{
+  L=blank();
+  const did=!CLASS && ls.get("lm:draft",null), d=did && ls.get("lm:"+did,null);
+  if(d && d.sents && d.sents.length) BANNER={kind:"draft",d:fix(d)};
+}
+// Every change: kept at once in this browser (so nothing is lost), and marked "not saved in a file yet".
+function touch(noRender){
+  if(RO) return;
+  L.t=Date.now();
+  if(!ls.set("lm:"+L.id,L)) toast("⚠ This browser could not keep a copy of your work. Click 💾 Save now.",8000);
+  if(!FILE && L.sents.length) ls.set("lm:draft",L.id);     // the lesson offered again when the empty tool is opened
+  if(noRender) updSave(); else renderAll();
+  sendLesson();
+}
+const full=arr=>L.langs.every((_,j)=>((arr||[])[j]||"").trim());
+function vocab(){ const V=new Map(); L.sents.forEach((s,i)=>toks(s.t).forEach(k=>{ const o=V.get(k); if(o) o.c++; else V.set(k,{first:i,c:1}); })); return V; }
+const missS=()=>L.sents.map((s,i)=>full(s.tr)?-1:i).filter(i=>i>=0);
+// A word is missing until it has every meaning and every ticked pronunciation (so ticking an alphabet later asks for it).
+const missW=()=>[...vocab().keys()].filter(k=>{ const g=L.words[k]; return !(g && full(g.tr) && PR().every(sc=>((g.p||{})[sc]||"").trim())); });
+
+// ---------------------------------------------------------------- text → sentences
+const LANGCODE={french:"fr",français:"fr",english:"en",spanish:"es",español:"es",german:"de",deutsch:"de",italian:"it",italiano:"it",
+  portuguese:"pt",dutch:"nl",russian:"ru",hebrew:"he",arabic:"ar",polish:"pl",romanian:"ro",catalan:"ca",swedish:"sv",turkish:"tr",greek:"el"};
+function sentencesOf(p){
+  let a=null;
+  if(window.Intl && Intl.Segmenter){ try{
+    a=[...new Intl.Segmenter(LANGCODE[(L.src||"").trim().toLowerCase()],{granularity:"sentence"}).segment(p)].map(x=>x.segment);
+  }catch(e){} }
+  if(!a) a=p.match(/(?:[^.!?…]|\.(?=\d))+(?:[.!?…]+["»”’)\]]*|$)/g)||[p];      // (older browsers) 3.5 and 2.000 are not cuts
+  // Repairs: a closing » ” ) goes back to its sentence; « Ça va ? » dit-il. (the next part starts in lowercase) stays one
+  // sentence; so does what follows M. / Mme / Dr. / Mr. or an initial (J.M.G. Le Clézio).
+  const out=[];
+  a.forEach(x=>{ const k=out.length-1;
+    if(k>=0){ const c=x.match(/^\s*[»”’)\]]+/); if(c){ out[k]+=c[0]; x=x.slice(c[0].length); }
+      if(/^\s*\p{Ll}/u.test(x) || /(?:^|[\s«(“".])(?:M|MM|Mme|Mlle|Dr|Pr|Mr|Mrs|Ms|St|Ste|\p{Lu})\.\s*$/u.test(out[k])){ out[k]+=x; return; } }
+    out.push(x); });
+  return out.map(x=>x.trim()).filter(Boolean);
+}
+// A word cut at the end of a line (text copied from a PDF): "s'appe-" + "lait" → "s'appelait". After a hyphen, these
+// usual second halves keep it: peut-être, dit-il, a-t-elle, là-bas, celui-ci.
+const KEEP_HYPHEN=/^(?:t|il|ils|elle|elles|on|je|tu|nous|vous|le|la|les|lui|leur|moi|toi|y|en|ce|ci|là|bas|être|même)$/i;
+const dehyphen=p=>p.replace(/(\p{L})[-­‐][ \t]*\n\s*(\p{Ll}[\p{L}\p{M}]*)/gu,(m,a,b)=>a+(KEEP_HYPHEN.test(b)?"-":"")+b);
+// Paragraphs = separated by an empty line. Inside a paragraph, line breaks are joined, then cut into sentences.
+function splitText(txt){
+  return txt.replace(/\r/g,"").split(/\n\s*\n/).map(p=>dehyphen(p).replace(/\s*\n\s*/g," ").replace(/[ \t]+/g," ").trim()).filter(Boolean)
+    .map(p=>sentencesOf(p).join("\n")).join("\n\n");
+}
+const sentsToText=()=>L.sents.map((s,i)=>(i&&s.np?"\n":"")+s.t).join("\n");
+// One line = one sentence; an empty line = new paragraph. Unchanged sentences keep their translations and notes.
+function useText(txt){
+  const out=[]; let np=true;
+  txt.replace(/\r/g,"").split("\n").forEach(l=>{ l=l.trim(); if(!l){np=true;return;} out.push({t:l,np}); np=false; });
+  const pool=new Map(); L.sents.forEach(s=>{ if(!pool.has(s.t)) pool.set(s.t,[]); pool.get(s.t).push(s); });
+  let fresh=0; const kept=new Set();
+  const next=out.map(o=>{ const old=(pool.get(o.t)||[]).shift(); if(old){ kept.add(old); old.np=o.np; return old; } fresh++; return {t:o.t,np:o.np,tr:[],n:[]}; });
+  // As many lines changed as were taken away: they were edited (a typo fixed), so they keep their notes, in order.
+  // Their translations go to the archive and are asked again.
+  const gone=L.sents.filter(s=>!kept.has(s)), added=next.filter(s=>!kept.has(s)), edited=gone.length===added.length;
+  gone.forEach((s,i)=>{ if(edited) added[i].n=s.n||[];
+    if((s.tr||[]).some(Boolean)||(!edited&&(s.n||[]).length)) L.removed.push({when:Date.now(),sentence:s}); });
+  L.sents=next; cur=Math.min(cur,Math.max(0,L.sents.length-1)); return fresh;
+}
+
+// ---------------------------------------------------------------- the prompt for the AI, and reading its answer
+function promptFor(){
+  const mw=new Set(missW()), S=L.batch?missS().slice(0,L.batch):missS(); let W=[], ctx=[];
+  if(S.length){ const seen=new Set(); S.forEach(i=>toks(L.sents[i].t).forEach(k=>{ if(mw.has(k)&&!seen.has(k)){ seen.add(k); W.push(k); } })); W=W.slice(0,400); }
+  else{ W=[...mw].slice(0,400); const V=vocab(); ctx=[...new Set(W.map(k=>V.get(k).first))].slice(0,40); }
+  if(!S.length && !W.length) return null;
+  const LG=L.langs, src=L.src||"the original language";
+  const pr=PR();
+  let p=`I am preparing a reading lesson in ${src} for students who speak ${LG.join(" and ")}.\n`+
+    `Please translate the ${S.length?(W.length?"sentences and the words":"sentences"):"words"} listed below.\n\n`+
+    `Reply ONLY with lines in this exact format, and nothing else (no introduction, no headings, no tables, no bold, no comments). Put all the lines inside ONE code block, one item per line:\n\n`;
+  if(S.length) p+=`S<number> | ${LG.map(l=>`<${l} translation>`).join(" | ")}\n`;
+  if(W.length) p+=`W | <the word, copied exactly> | ${LG.map(l=>`<${l} meaning>`).join(" | ")}${pr.map(sc=>` | <pronunciation in ${sc} letters>`).join("")}\n`;
+  p+=`\nRules:\n`;
+  if(S.length) p+=`- Write one S line for each sentence, with its number. Translate the whole sentence, naturally and faithfully.\n`;
+  if(W.length) p+=`- Write one W line for each word, copying the word exactly as it is in the list. Give the meaning it has in these sentences, in 1 to 4 words. If it is an inflected form (a conjugated verb, a plural, a feminine form...), add its dictionary form in brackets.\n`;
+  if(W.length && pr.length) p+=`- Pronunciation: how to say the ${src} word, ${pr.map(sc=>`written in ${sc} letters`).join(", then ")}. In Latin letters, write the stressed syllable in CAPITALS.\n`;
+  p+=`- Use the | character only as a separator.\n- After the last line, write a line with only the word END.\n`;
+  asked=new Map(S.map(i=>[i+1,L.sents[i].t]));
+  if(S.length) p+=`\nSENTENCES (${S.length}):\n`+S.map(i=>`S${i+1} = ${L.sents[i].t}`).join("\n")+"\n";
+  if(ctx.length) p+=`\nFor context only (do NOT translate these sentences):\n`+ctx.map(i=>L.sents[i].t).join("\n")+"\n";
+  if(W.length) p+=`\nWORDS (${W.length}):\n`+W.join("\n")+"\n";
+  return {p,s:S.length,w:W.length};
+}
+// The sentences the last prompt asked for (S number → text), so an answer still lands on the right sentence
+// if the text was changed between copying the prompt and pasting the answer.
+let asked=null;
+// Reads any pasted AI answer. Tolerant: ignores chatter, bullets, bold, code fences and table bars; merges what it finds.
+// It only fills what is empty: a translation you corrected by hand is never replaced.
+function parseAnswer(txt){
+  const r={s:0,w:0,bad:0,end:false}, V=vocab(), n=L.langs.length;
+  // One value: drop `code` and **bold** / *italic* around it, and quote marks only when they wrap the whole value
+  // ("Hello," he said. keeps its quotes). keepQ: the original sentence itself is a quotation, so keep them.
+  const clean=(x,keepQ)=>{ x=(x||"").trim().replace(/^`+|`+$/g,"").trim().replace(/^\*{1,2}([^*]+)\*{1,2}$/,"$1").trim();
+    const q=!keepQ && x.match(/^["“«]\s*([^"“”«»]*?)\s*["”»]$/); return q?q[1]:x; };
+  txt=txt.replace(/\r/g,"").replace(/\\([\[\]()*_#`~>|.!{}+-])/g,"$1");          // "\[faire\]" → "[faire]" (escapes added by the chat's copy)
+  // ChatGPT shows the lines as one paragraph, so its copy can glue all the S / W lines into one. Only if the answer is
+  // glued like that (far more records than lines starting with one), cut it again, and only before a real record:
+  // S + the next sentence number, or W + a word of the text. So "S1", "W", "END" inside a translation stay as they are.
+  const REC=/(?:^|\s)(?:\*\*)?(?:S\s*\d+|W)\s*(?:\*\*)?\s*\|/g;
+  const recs=(txt.match(REC)||[]).length, starts=txt.split("\n").filter(x=>/^[\s\-*•>|`]*(?:\d+[.)]\s*)?(?:\*\*)?(?:S\s*\d+|W)\s*(?:\*\*)?\s*\|/.test(x)).length;
+  if(recs>=2*Math.max(1,starts)){
+    let lastS=0;
+    txt=txt.replace(/(\|?)[ \t]+END[ \t]*$/gm,(m,bar)=>bar?m:"\nEND")              // a glued line's final END, but not "| END" (a translation that is END)
+      .replace(/^/gm," ")                                                             // so a record at the start of a line is counted too
+      .replace(/[ \t]+(?=(?:\*\*)?(?:S\s*(\d+)\s*(?:\*\*)?\s*\||W\s*(?:\*\*)?\s*\|\s*([^|]*?)\s*\|))/g,(m,sn,w)=>{
+      if(sn){ const k=+sn; if(k>lastS && k<=L.sents.length){ lastS=k; return "\n"; } return m; }
+      return V.has(norm(clean(w))) ? "\n" : m; });
+  }
+  txt.split("\n").forEach(raw=>{
+    let l=raw.replace(/[‎‏‪-‮⁦-⁩]/g,"").replace(/｜/g,"|").trim();
+    l=l.replace(/^`+|`+$/g,"").replace(/^\|\s*/,"").replace(/\s*\|$/,"").replace(/^(?:[-*•>]+|\d+[.)])\s+/,"").trim();
+    if(!l) return;
+    if(/^\**END\**$/.test(l)){ r.end=true; return; }                              // END alone on its line
+    let m=l.match(/^\**\s*S\s*(\d+)\s*\**\s*([|:=.)–—-])\s*(?:\*\*\s)?\s*(.*)$/i);   // also **S1:** and **S1 |**
+    if(m){ const q=asked&&asked.get(+m[1]), at=L.sents[+m[1]-1];
+      const s=q==null||(at&&at.t===q)?at:L.sents.find(x=>x.t===q);                      // the text changed since the prompt: find it by text
+      const parts=m[3].split("|").map(p=>clean(p,s&&/^["“«]/.test(s.t)));
+      const same=a=>!!s && norm(a).replace(/[^\p{L}\p{N}]/gu,"")===norm(s.t).replace(/[^\p{L}\p{N}]/gu,"");
+      if(parts.length>n && same(parts[0])) parts.shift();                             // a table that repeats the original sentence first
+      if(!s || !parts[0] || (m[2]==="=" && same(parts[0]))){ r.bad++; return; }       // "S1 = …" is the prompt's own line
+      s.tr=L.langs.map((_,j)=>((s.tr||[])[j]||"").trim()||parts[j]||""); r.s++; return; }
+    m=l.match(/^\**\s*W\s*\**\s*[|:]\s*(?:\*\*\s)?\s*(.*)$/i);
+    if(m){ const parts=m[1].split("|").map(p=>clean(p)), k=norm(parts[0]).replace(/[.,;:!?]+$/,"");
+      if(!V.has(k) || !parts[1]){ r.bad++; return; }
+      const w=L.words[k]||{tr:[],p:{},n:""};
+      w.tr=L.langs.map((_,j)=>((w.tr||[])[j]||"").trim()||parts[1+j]||""); w.p=w.p||{};
+      PR().forEach((sc,j)=>{ if(parts[1+n+j] && !(w.p[sc]||"").trim()) w.p[sc]=parts[1+n+j]; });
+      L.words[k]=w; r.w++; return; }
+    if(/^(S\s*\d|W\s*\|)/i.test(l)) r.bad++;
+  });
+  return r;
+}
+
+// ---------------------------------------------------------------- saving to a file
+let fileHandle=null;
+async function saveFile(readonly){
+  // 📦 Package: without the archive (removed sentences, notes, sections and tabs), which is only for you.
+  const out=readonly?Object.assign({},L,{removed:[],tabs:Object.assign({},L.tabs,{archived:{}})}):L;
+  const json=JSON.stringify({lesson:out,readonly:!!readonly}).replace(/</g,"\\u003c");
+  const html="<!doctype html>\n"+SNAP.replace(DATA_RX,(m,a,b)=>a+json+b);
+  const name=fname(L.title)+(readonly?" - package":"")+".html";
+  if(!readonly && window.showSaveFilePicker){          // Chrome / Edge: save in place (asks where only the first time)
+    try{
+      if(!fileHandle) fileHandle=await window.showSaveFilePicker({suggestedName:name,types:[{description:"Web page",accept:{"text/html":[".html"]}}]});
+      const w=await fileHandle.createWritable(); await w.write(html); await w.close();
+      markSaved(true); toast(`💾 Saved in “${fileHandle.name}”.`); return;
+    }catch(e){ if(e && e.name==="AbortError") return; fileHandle=null; }
+  }
+  download(html,name,"text/html");
+  if(readonly) toast(`📦 “${name}” is in your Downloads folder. Send that one file; it opens by double-click.`,7000);
+  else{ markSaved(false); toast(`💾 Saved as “${name}” in your Downloads folder. Next time, double-click that file to continue.`,7000); }
+}
+// inFile: the file is surely written (Chrome / Edge save window). A download may still have failed or been cancelled, so the
+// empty tool keeps offering the lesson, and only notes that it was downloaded (lm:dl:<id>).
+function markSaved(inFile){ savedT=L.t; if(!FILE){ if(inFile) ls.del("lm:draft"); else ls.set("lm:dl:"+L.id,L.t); } BANNER=null; renderBanner(); updSave(); }
+function updSave(){ const d=!RO && L.t>savedT; $("saveb").classList.toggle("dirty",d); $("saveb").textContent=d?"💾 Save •":"💾 Save";
+  $("saveb").title=d?"You have changes that are not in a file yet: click to save":"Save the lesson as a file"; }
+
+// ---------------------------------------------------------------- modal and simple editor
+const modal=$("modal"), mcard=$("mcard"); let modalSoft=false;   // soft = information only: Esc / click outside closes it
+function closeModal(){ modal.classList.remove("on"); mcard.innerHTML=""; }
+modal.addEventListener("mousedown",e=>{ if(e.target===modal && modalSoft) closeModal(); });
+function openModal(html,soft){ mcard.innerHTML=html; modal.classList.add("on"); modalSoft=!!soft; mcard.scrollTop=0; modal.scrollTop=0; }
+function openEditor(title, fields, onSave, extra){
+  openModal(`<h2>${esc(title)}</h2>`+(extra&&extra.top||"")+fields.map((f,i)=>`<label>${esc(f.label)}${f.help?`<span class="help">${esc(f.help)}</span>`:""}</label>`+
+    (f.rows==1?`<input type="text" id="ef${i}" dir="auto" value="${esc(f.val)}">`:`<textarea id="ef${i}" dir="auto" rows="${f.rows||3}">${esc(f.val)}</textarea>`)).join("")+
+    `<div class="row">${extra&&extra.remove?`<button class="danger" id="erem">${esc(extra.remove[0])}</button>`:""}<button id="ecan">Cancel</button><button class="primary" id="esave">Save</button></div>`);
+  $("ecan").onclick=closeModal;
+  $("esave").onclick=()=>{ const v={}; fields.forEach((f,i)=>v[f.k]=$("ef"+i).value); mcard.querySelectorAll("input[type=checkbox][id]").forEach(c=>v[c.id]=c.checked); closeModal(); onSave(v); };
+  if(extra&&extra.remove) $("erem").onclick=()=>{ if(confirm(extra.remove[1])){ closeModal(); extra.remove[2](); } };
+  const f0=$("ef0"); if(f0) f0.focus();
+}
+
+// ---------------------------------------------------------------- words: tokenizer and pop-ups
+function tokenize(text){
+  let h="",last=0;
+  for(const m of String(text).matchAll(WRX)){ h+=esc(text.slice(last,m.index))+`<span class="w" data-k="${esc(norm(m[0]))}">${esc(m[0])}</span>`; last=m.index+m[0].length; }
+  return h+esc(String(text).slice(last));
+}
+// Pop-ups inside notes and your tabs: wraps every word that has a translation. Translations themselves are skipped.
+const SKIP=".w,[dir],button,.tag,.meta,.ed,kbd,.lab,input,textarea,select";
+function wordify(root){
+  if(!root) return;
+  const tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement&&n.parentElement.closest(SKIP)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[]; while(tw.nextNode()) nodes.push(tw.currentNode);
+  nodes.forEach(n=>{ const t=n.nodeValue, frag=document.createDocumentFragment(); let last=0, hit=false;
+    for(const m of t.matchAll(WRX)){ const k=norm(m[0]); if(!L.words[k]) continue; hit=true; frag.append(t.slice(last,m.index));
+      const sp=document.createElement("span"); sp.className="w"; sp.dataset.k=k; sp.textContent=m[0]; frag.append(sp); last=m.index+m[0].length; }
+    if(hit){ frag.append(t.slice(last)); n.replaceWith(frag); } });
+}
+const tip=$("tip");
+function placeTip(r){ tip.style.display="block"; const tw=tip.offsetWidth, th=tip.offsetHeight;
+  let x=Math.min(Math.max(8,r.left),innerWidth-tw-8), y=r.top-th-8; if(y<8) y=r.bottom+8; tip.style.left=x+"px"; tip.style.top=y+"px"; }
+document.addEventListener("mouseover",e=>{
+  if(CLASS) return;
+  const w=e.target.closest(".w"); if(!w){ tip.style.display="none"; return; }
+  const g=L.words[w.dataset.k];
+  tip.innerHTML=`<div class="tw">${esc(w.textContent)}</div>`+(g?L.langs.map((lg,j)=>g.tr[j]?`<div class="tl"><small>${esc(lg)}</small><span dir="auto">${esc(g.tr[j])}</span></div>`:"").join("")+
+    (pronVals(g).some(Boolean)?`<div class="tp">🔊 ${pronVals(g).filter(Boolean).map(v=>`<span dir="auto">${esc(v)}</span>`).join(" &nbsp;·&nbsp; ")}</div>`:"")+(g.n?`<div class="tn">${md(g.n)}</div>`:""):`<div class="tm">No translation yet${RO?"":" (✨ Setup, or ✎ Edit and click the word)"}</div>`);
+  placeTip(w.getBoundingClientRect());
+});
+function editWord(k){
+  const g=L.words[k]||{tr:[],p:{},n:""};
+  openEditor(`Word: ${k}`,[...L.langs.map((lg,j)=>({k:"t"+j,label:lg,val:(g.tr||[])[j]||"",rows:1})),
+    ...PR().map((sc,j)=>({k:"p"+j,label:`Pronunciation (${sc} letters)`,val:((g.p||{})[sc])||"",rows:1,help:"optional"})),
+    {k:"n",label:"Note",val:g.n||"",rows:1,help:"optional; shown in yellow in the pop-up"}],
+    v=>{ const p=Object.assign({},g.p||{}); PR().forEach((sc,j)=>p[sc]=v["p"+j].trim()); L.words[k]={tr:L.langs.map((_,j)=>v["t"+j].trim()),p,n:v.n.trim()}; touch(); });
+}
+document.addEventListener("click",e=>{             // edit mode: a click on any word opens its editor
+  if(!document.body.classList.contains("editing")) return;
+  const w=e.target.closest(".w"); if(!w || modal.contains(w)) return;
+  e.preventDefault(); e.stopPropagation(); editWord(w.dataset.k);
+},true);
+
+// ---------------------------------------------------------------- reading view
+const textEl=$("text"), panel=$("panel");
+let cur=0, spans=[]; const open={t:false,n:false};
+const NOTE_TYPES=[["expr","💬 Expression","**…** means …"],["gram","📘 Grammar","**…**: …"],["ety","🌱 Word origin","**…** comes from …"],
+  ["q","❓ Question for the class","…?"],["ctx","🌍 Culture / context","…"],["rem","✏️ Other","…"]];
+const NT=Object.fromEntries(NOTE_TYPES.map(t=>[t[0],t[1].replace(/^\S+\s/,"")]));
+const tagH=t=>`<span class="tag ${esc(t)}">${esc(NT[t]||t)}</span>`;
+function renderText(){
+  if(!L.sents.length){ textEl.innerHTML=`<div class="empty">No text yet.${RO?"":` <button data-go="setup">Go to ✨ Setup to add one</button>`}</div>`; panel.innerHTML=""; spans=[]; return; }
+  let h="<p>";
+  L.sents.forEach((s,i)=>{ if(i&&s.np) h+="</p><p>"; h+=`<span class="s" data-i="${i}"><span class="num">${i+1}</span>${tokenize(s.t)}</span> `; });
+  textEl.innerHTML=h+"</p>"; spans=[...textEl.querySelectorAll(".s")];
+  spans.forEach((sp,k)=>{ sp.classList.toggle("cur",k==cur); sp.classList.toggle("read",k<cur); });
+}
+const RV=[{id:"t",label:"Translation",key:"T"},{id:"n",label:"Notes",key:"N"}];
+function renderPanel(){
+  if(!L.sents.length) return;
+  const s=L.sents[cur];
+  const trs=L.langs.map((lg,j)=>`<div class="trl"><span class="lab">${esc(lg)}</span><div dir="auto" class="trt">${esc((s.tr||[])[j]||"—")}</div></div>`).join("");
+  const notes=(s.n||[]).map(n=>`<li>${tagH(n[0])}${md(n[1])}</li>`).join("");
+  panel.innerHTML=`
+   <div class="navrow"><button id="prev" title="Previous (←)">◀</button><span class="meta">Sentence ${cur+1} of ${L.sents.length}</span><button id="next" title="Next (→ or Space)">▶</button></div>
+   <div class="fr" id="pfr">${tokenize(s.t)}</div>
+   <button class="ed" id="eds">✎ Edit this sentence</button>
+   <div class="reveal">
+     <div class="rh"><span>Show</span><span>to me</span><span>to class${classAlive()?"":" (closed)"}</span></div>
+     ${RV.map(r=>`<div class="rr"><span>${r.label}<kbd>${r.key}</kbd> <kbd>⇧${r.key}</kbd></span>
+       <button data-me="${r.id}" class="${open[r.id]?"on":""}" title="Show on my screen (${r.key})">👁</button>
+       <button data-cl="${r.id}" class="cl ${CST.show[r.id]?"on":""}" title="Show on the class screen (Shift+${r.key})">📽</button></div>`).join("")}
+     <div class="wordrow">${CST.word?`Word shown to the class: <b>${esc(CST.word.f)}</b> <button id="unspot" title="Hide (Esc)">× hide</button>`:"Click a word of the sentence to show it to the class."}</div>
+   </div>
+   <div class="sec ${open.t?"on":""}"><h3>Translation <button class="ed" data-edit="t">✎ edit</button></h3>${trs}</div>
+   <div class="sec ${open.n?"on":""}"><h3>Notes <button class="ed" data-edit="n">✎ add / edit notes</button></h3>${notes?`<ul class="notes">${notes}</ul>`:`<div class="meta">No notes.${RO?"":" To add one: ✎ Edit, then “add / edit notes”."}</div>`}</div>`;
+  wordify(panel.querySelector("ul.notes"));
+  panel.querySelectorAll("[data-me]").forEach(b=>b.onclick=()=>toggle(b.dataset.me));
+  panel.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>toggleClass(b.dataset.cl));
+  panel.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>b.dataset.edit=="t"?editTrans():editNotes());
+  $("prev").onclick=()=>go(cur-1); $("next").onclick=()=>go(cur+1); $("eds").onclick=editSentence;
+  const ub=$("unspot"); if(ub) ub.onclick=()=>setCST({word:null});
+  markSpot();
+}
+function markSpot(){
+  [$("pfr"),spans[cur]].forEach(c=>{ if(!c) return; [...c.querySelectorAll(".w")].forEach((w,i)=>w.classList.toggle("spot",!!CST.word&&CST.word.i===i)); });
+}
+function go(i){
+  if(i<0||i>=L.sents.length) return;
+  if(spans[cur]) spans[cur].querySelectorAll(".w.spot").forEach(w=>w.classList.remove("spot"));
+  cur=i; open.t=open.n=false; CST.show={t:false,n:false}; CST.word=null;
+  spans.forEach((sp,k)=>{ sp.classList.toggle("cur",k==cur); sp.classList.toggle("read",k<cur); });
+  if(spans[cur]) spans[cur].scrollIntoView({block:"center",behavior:"smooth"});
+  renderPanel(); ls.set("lm:cur:"+L.id,cur); sendState();
+}
+function toggle(k){ open[k]=!open[k]; renderPanel(); }
+textEl.addEventListener("click",e=>{
+  const sp=e.target.closest(".s"); if(!sp) return;
+  const w=e.target.closest(".w");
+  if(w && +sp.dataset.i===cur) return spotWord(w,sp);   // a word of the current sentence: show it to the class
+  go(+sp.dataset.i);
+});
+panel.addEventListener("click",e=>{ const w=e.target.closest("#pfr .w"); if(w) spotWord(w,$("pfr")); });
+function spotWord(w,box){ const i=[...box.querySelectorAll(".w")].indexOf(w); setCST({word:CST.word&&CST.word.i===i?null:{k:w.dataset.k,f:w.textContent,i}}); }
+
+// ---------------------------------------------------------------- editors: sentence, translation, notes
+function editSentence(){
+  const i0=cur, s=L.sents[i0];
+  openEditor(`Sentence ${i0+1}`,[{k:"t",label:"Text",val:s.t,rows:4,help:"Press Enter to cut it into two sentences. Empty = remove the sentence."}],
+    v=>{
+      const parts=v.t.split("\n").map(x=>x.trim()).filter(Boolean), np=v.enp!=null?v.enp:s.np;
+      if(!parts.length){ if(!confirm("Remove this sentence? (Its translation and notes are kept in the file's archive.)")) return;
+        L.removed.push({when:Date.now(),sentence:s}); L.sents.splice(i0,1); cur=Math.max(0,Math.min(i0,L.sents.length-1));
+        CST.word=null; CST.show={t:false,n:false}; touch(); if(L.sents.length) go(cur); else sendState(); return; }       // start clean on the next sentence (and on the class screen)
+      if(parts.length==1){ s.t=parts[0]; s.np=np; touch(); go(i0); return; }
+      L.removed.push({when:Date.now(),sentence:JSON.parse(JSON.stringify(s))});
+      const news=parts.map((t,j)=>({t,np:j==0?np:false,tr:[],n:j==0?s.n:[]}));
+      L.sents.splice(i0,1,...news); touch(); go(i0);
+      toast(`Cut into ${parts.length} sentences. Their translations are missing now: ✨ Setup → 📋 Copy the next prompt.`,6000);
+    },
+    {top:`<label style="font-weight:normal"><input type="checkbox" id="enp" ${s.np?"checked":""}> This sentence starts a new paragraph</label>`+
+      (i0<L.sents.length-1?`<p><button id="ejoin" style="border:1px solid #bbb;background:#fff;border-radius:8px;padding:5px 12px">⤵ Join with the next sentence</button></p>`:"")});
+  const j=$("ejoin"); if(j) j.onclick=()=>{          // uses what is typed in the box; a translation is kept only if both halves have one
+    const n=L.sents[i0+1]; L.removed.push({when:Date.now(),sentence:JSON.parse(JSON.stringify(s))},{when:Date.now(),sentence:n});
+    s.t=($("ef0").value.replace(/\s*\n\s*/g," ").trim()||s.t)+" "+n.t; s.np=$("enp").checked;
+    s.tr=L.langs.map((_,k)=>{ const a=(s.tr||[])[k], b=(n.tr||[])[k]; return a&&b?a+" "+b:""; }); s.n=(s.n||[]).concat(n.n||[]);
+    L.sents.splice(i0+1,1); closeModal(); touch(); go(i0); };
+}
+function editTrans(){
+  const i0=cur, s=L.sents[i0];
+  openEditor(`Sentence ${i0+1}: translation`,L.langs.map((lg,j)=>({k:"t"+j,label:lg,val:(s.tr||[])[j]||"",rows:3})),
+    v=>{ s.tr=L.langs.map((_,j)=>v["t"+j].trim()); touch(); },{top:`<div class="src">${esc(s.t)}</div>`});
+}
+function editNotes(){
+  const i0=cur, s=L.sents[i0]; let list=(s.n||[]).map(n=>n.slice()), focus=null;
+  const words=[...new Set(s.t.match(WRX)||[])];
+  const sync=()=>mcard.querySelectorAll(".ncard").forEach(c=>{ const j=+c.dataset.j; list[j]=[c.querySelector("select").value,c.querySelector("textarea").value]; });
+  const selectDots=ta=>{ const k=ta.value.indexOf("…"); ta.focus(); if(k>=0) ta.setSelectionRange(k,k+1); };
+  function draw(fj){
+    openModal(`<h2>Notes for sentence ${i0+1}</h2><div class="src">${esc(s.t)}</div>
+      <div id="nlist">${list.map((n,j)=>`<div class="ncard" data-j="${j}"><div class="nhead">
+        <select title="Kind of note">${NOTE_TYPES.map(t=>`<option value="${t[0]}" ${t[0]==n[0]?"selected":""}>${t[1]}</option>`).join("")}</select>
+        <button data-fmt="**" title="Bold: select some text, then click"><b>B</b></button><button data-fmt="*" title="Italic: select some text, then click"><i>I</i></button>
+        <span class="sp"></span>${j?`<button data-up="${j}" title="Move up">↑</button>`:""}<button data-del="${j}" title="Remove this note">🗑</button></div>
+        <textarea dir="auto" rows="3">${esc(n[1])}</textarea></div>`).join("")||`<p class="meta">No notes yet. Choose a kind of note below.</p>`}</div>
+      <div class="lab2">Add a note:</div>
+      <div class="presets">${NOTE_TYPES.map(t=>`<button data-add="${t[0]}">${t[1]}</button>`).join("")}</div>
+      <div class="lab2">Words of the sentence <span class="help" style="font-weight:normal;color:var(--muted)">click one to put it (in bold) in the note you are writing</span></div>
+      <div class="chips">${words.map(w=>`<button data-chip="${esc(w)}">${esc(w)}</button>`).join("")}</div>
+      <p class="meta">In the text, **word** shows as <b>word</b> and *word* as <i>word</i>. Replace each … with your own words.</p>
+      <div class="row"><button id="ecan">Cancel</button><button class="primary" id="esave">Save notes</button></div>`);
+    mcard.querySelectorAll(".ncard textarea").forEach((ta,j)=>ta.addEventListener("focus",()=>focus=j));
+    mcard.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{ sync(); const t=NOTE_TYPES.find(x=>x[0]==b.dataset.add); list.push([t[0],t[2]]); draw(list.length-1); });
+    mcard.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{ sync(); list.splice(+b.dataset.del,1); focus=null; draw(); });
+    mcard.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{ sync(); const j=+b.dataset.up; [list[j-1],list[j]]=[list[j],list[j-1]]; draw(j-1); });
+    mcard.querySelectorAll("[data-fmt]").forEach(b=>{ b.onmousedown=e=>e.preventDefault(); b.onclick=()=>{
+      const ta=b.closest(".ncard").querySelector("textarea"), f=b.dataset.fmt, a=ta.selectionStart, z=ta.selectionEnd, sel=ta.value.slice(a,z)||"…";
+      ta.value=ta.value.slice(0,a)+f+sel+f+ta.value.slice(z); ta.focus(); ta.setSelectionRange(a+f.length,a+f.length+sel.length); }; });
+    mcard.querySelectorAll("[data-chip]").forEach(b=>{ b.onmousedown=e=>e.preventDefault(); b.onclick=()=>{
+      const tas=mcard.querySelectorAll(".ncard textarea"); let ta=tas[focus!=null?focus:tas.length-1];
+      if(!ta){ sync(); list.push(["expr","**…** means …"]); draw(list.length-1); ta=mcard.querySelectorAll(".ncard textarea")[list.length-1]; }
+      const word="**"+b.dataset.chip+"**";
+      if(ta.value.includes("**…**")) ta.value=ta.value.replace("**…**",word);
+      else{ const a=ta.selectionStart, z=ta.selectionEnd; ta.value=ta.value.slice(0,a)+word+ta.value.slice(z); }
+      selectDots(ta); }; });
+    $("ecan").onclick=closeModal;
+    $("esave").onclick=()=>{ sync(); s.n=list.filter(n=>{ const v=n[1].trim(); return v && v!="…" && !NOTE_TYPES.some(t=>t[2]==v); });   // untouched presets are dropped
+      closeModal(); open.n=true; touch(); };
+    if(fj!=null){ const ta=mcard.querySelectorAll(".ncard textarea")[fj]; if(ta){ focus=fj; selectDots(ta); } }
+  }
+  draw();
+}
+
+// ---------------------------------------------------------------- words tab
+let onlyMissing=false;
+function renderWords(){
+  const V=vocab(), miss=new Set(missW());
+  const rows=[...V].filter(([k])=>!onlyMissing||miss.has(k)).map(([k,o])=>{ const g=L.words[k];
+    return `<tr class="${miss.has(k)?"miss":""}"><td class="wf"><span class="w" data-k="${esc(k)}">${esc(k)}</span></td>${L.langs.map((_,j)=>`<td dir="auto">${esc(g&&g.tr[j]||"")}</td>`).join("")}${pronVals(g).map(v=>`<td dir="auto">${esc(v)}</td>`).join("")}<td><a data-goto="${o.first}">${o.first+1}</a></td></tr>`; }).join("");
+  $("words").innerHTML=`<h2>Words</h2>
+    <p class="meta" style="font-size:15px">${V.size} different words, ${V.size-miss.size} translated.${RO?"":" To change one: ✎ Edit, then click the word."} The number is the first sentence where the word appears (click it to go there).</p>
+    <p style="font:15px Arial,sans-serif"><label><input type="checkbox" id="onlym" ${onlyMissing?"checked":""}> Show only the words without a translation (${miss.size})</label></p>
+    <table class="wt"><tr><th>Word</th>${L.langs.map(l=>`<th>${esc(l)}</th>`).join("")}${PR().map(sc=>`<th>Pronunciation (${esc(sc)})</th>`).join("")}<th>Sentence</th></tr>${rows}</table>`;
+  $("onlym").onchange=e=>{ onlyMissing=e.target.checked; renderWords(); };
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-goto]"); if(a){ show("read"); go(+a.dataset.goto); return; }
+  const g=e.target.closest("[data-go]"); if(g){ show(g.dataset.go); return; }
+  const b=e.target.closest("button.show"); if(b){ const nx=b.parentElement.nextElementSibling; if(nx) nx.classList.toggle("on"); }
+});
+
+// ---------------------------------------------------------------- setup tab (the step-by-step assistant)
+let srcDirty=false, textMsg="", ansMsg="";
+function renderSetup(){
+  const el=$("setup"); if(RO){ el.innerHTML=""; return; }
+  const old=$("srctext"), keep=old&&srcDirty?old.value:null;
+  const V=vocab(), ms=missS().length, mw=missW().length, ns=L.sents.length, nw=V.size, pct=(a,b)=>b?Math.round(100*a/b):0;
+  const done=ns&&!ms&&!mw;
+  el.innerHTML=`
+  <div class="welcome">👋 New here? <button data-guide>📖 Read the step-by-step guide</button> (2 minutes). Everything you do is kept in this browser; click <b>💾 Save</b> to keep it in a file.${FILE?"":"<br>To continue a lesson you already saved, close this and double-click the lesson's own file."}</div>
+  <h2>✨ Set up your lesson</h2>
+  <div class="step"><div class="sn">1</div><div class="sb"><h3>Name and languages</h3>
+    <div class="grid">
+      <label>Title of the lesson<input id="f_title" value="${esc(L.title)}" placeholder="for example: Three riddles"></label>
+      <label>Language of the text<input id="f_src" value="${esc(L.src)}" placeholder="for example: French"></label>
+      <label>Translate into<input id="f_l1" value="${esc(L.langs[0]||"")}" placeholder="for example: Hebrew"></label>
+      <label>… and also into (optional)<input id="f_l2" value="${esc(L.langs[1]||"")}" placeholder="leave empty for one language"></label>
+      <div class="checks"><b>Pronunciation of words</b><span class="help">tick one or more</span>
+        ${pronChoices().map(c=>`<label><input type="checkbox" data-pron="${esc(c)}" ${PR().some(x=>x.toLowerCase()==c.toLowerCase())?"checked":""}> in ${esc(c)} letters</label>`).join("")}
+        <label><input type="checkbox" data-pron="" ${PR().length?"":"checked"}> None</label></div>
+    </div></div></div>
+  <div class="step"><div class="sn">2</div><div class="sb"><h3>The text</h3>
+    <p>Click in the box and paste your text (<kbd>Cmd</kbd>+<kbd>V</kbd> on a Mac, <kbd>Ctrl</kbd>+<kbd>V</kbd> on Windows).
+       It is cut into sentences by itself: <b>one sentence per line</b>, and an <b>empty line</b> between paragraphs.
+       Check the lines: press <kbd>Enter</kbd> to cut a line in two; delete the line break to join two lines. Then click <b>✓ Use this text</b>.
+       (If you paste more text next to lines already there, click <b>✂ Cut into sentences again</b>.)</p>
+    <textarea id="srctext" rows="14" dir="auto" placeholder="Paste your text here"></textarea>
+    <div class="btnrow"><button class="primary" id="useb">✓ Use this text</button><button id="splitb" title="Cut the whole box into sentences again">✂ Cut into sentences again</button><span id="textmsg" class="msg ${/^⚠/.test(textMsg)?"bad":"good"}">${esc(textMsg)}</span></div>
+  </div></div>
+  <div class="step ${ns?"":"dim"}"><div class="sn">3</div><div class="sb"><h3>Translations, with a free AI chat</h3>
+    ${!ns?`<p>First do step 2.</p>`:`
+    <div class="prog"><span>Sentences: <b>${ns-ms} of ${ns}</b></span><div class="bar"><i style="width:${pct(ns-ms,ns)}%"></i></div>
+      <span>Words: <b>${nw-mw} of ${nw}</b></span><div class="bar"><i style="width:${pct(nw-mw,nw)}%"></i></div></div>
+    ${ansMsg?`<p class="msg ${/^⚠/.test(ansMsg)?"bad":"good"}">${esc(ansMsg)}</p>`:""}
+    ${done?`<p class="ok">✓ Everything is translated. Go to the <a data-go="read">Text</a> tab to see it. (You can still change any translation: ✎ Edit.)</p>`:`
+    <ol class="howto">
+      <li>Click <button class="primary" id="copyb">📋 Copy the next prompt</button> <span class="msg good" id="copymsg"></span></li>
+      <li>Open a free AI chat in a new browser tab, for example <b>chatgpt.com</b> or <b>gemini.google.com</b>. Click in its message box, paste (<kbd>Cmd</kbd>+<kbd>V</kbd>, or <kbd>Ctrl</kbd>+<kbd>V</kbd> on Windows) and send.</li>
+      <li>Wait until the answer is finished (it ends with the word END). Copy it with the AI's copy button: at the top right of the grey box (two small squares, or the word Copy), or under the answer.</li>
+      <li>Come back to this tab, click in the box below and paste. The translations are added at once.</li>
+      <li>Both bars should now be full. If the AI stopped before the end (long texts), click 📋 again: the new prompt asks only for what is missing.</li>
+    </ol>
+    <textarea id="answer" rows="5" dir="auto" placeholder="Paste the AI's answer here"></textarea>
+    <div class="btnrow"><button id="addans">Add this answer</button><span class="meta">(Pasting adds it by itself; this button is for when you typed or changed it.)</span></div>
+    <details><summary>More options</summary>
+      <p><label>Sentences per prompt: <select id="f_batch">${[[0,"All (one prompt for the whole text)"],[40,"40"],[20,"20"],[10,"10"]].map(([n,t])=>`<option value="${n}" ${n==L.batch?"selected":""}>${t}</option>`).join("")}</select></label>
+      <span class="meta">Choose fewer only if the AI often stops in the middle of long answers.</span></p>
+      <p><button id="showp">Show the prompt</button></p><textarea id="ptext" rows="12" readonly style="display:none;font:13px/1.4 Menlo,monospace"></textarea>
+    </details>`}`}
+  </div></div>
+  <div class="step"><div class="sn">4</div><div class="sb"><h3>Save, then teach</h3>
+    <p>Click <b>💾 Save</b> (top right). The lesson becomes <b>one file</b>: Safari and Firefox put it in your <b>Downloads</b> folder; Chrome and Edge ask where to put it.
+       To continue another day, double-click that file. To teach, open the <a data-go="read">Text</a> tab; the <a data-guide>guide</a> explains the class screen and the notes.</p>
+  </div></div>`;
+  const ta=$("srctext"); ta.value=keep!=null?keep:sentsToText();
+  ta.addEventListener("input",()=>srcDirty=true);
+  ta.addEventListener("paste",()=>{ const whole=!ta.value.trim()||(ta.selectionStart===0&&ta.selectionEnd===ta.value.length); if(whole) setTimeout(()=>{ ta.value=splitText(ta.value); srcDirty=true;
+    const n=ta.value.split("\n").filter(x=>x.trim()).length; textMsg=`I cut the text into ${n} sentences. Check them, then click ✓ Use this text.`; $("textmsg").textContent=textMsg; },0); });
+  dropText(ta,t=>{ ta.value=splitText(t); srcDirty=true; });
+  $("splitb").onclick=()=>{ ta.value=splitText(ta.value); srcDirty=true; };
+  $("useb").onclick=()=>{
+    if(!ta.value.trim()){ textMsg="⚠ The box is empty: paste your text first."; renderSetup(); return; }
+    const fresh=useText(ta.value); srcDirty=false;
+    textMsg=`✓ ${L.sents.length} sentences${fresh&&fresh<L.sents.length?`, ${fresh} of them new or changed`:""}. Now step 3.`;
+    touch(); };
+  // A field change is stored at once. Only a language change needs the page redrawn, and that waits until the click or Tab
+  // has moved into the next field, which then gets its focus back (redrawing at once would throw that click away).
+  const redraw=()=>setTimeout(()=>{ const a=document.activeElement, id=a&&a.id, s0=a&&a.selectionStart, s1=a&&a.selectionEnd;
+    renderAll(); const b=id&&$(id); if(b&&b!==a){ b.focus(); try{ if(s0!=null) b.setSelectionRange(s0,s1); }catch(_){} } },0);
+  const setF=(id,fn,all)=>{ const f=$(id); if(f) f.onchange=()=>{ fn(f.value); touch(true); renderTitle(); if(all) redraw(); }; };
+  setF("f_title",v=>L.title=v.trim()); setF("f_src",v=>L.src=v.trim()); setF("f_batch",v=>L.batch=+v);
+  const langs=()=>setLangs([$("f_l1").value.trim(),$("f_l2").value.trim()]);
+  setF("f_l1",langs,1); setF("f_l2",langs,1);
+  el.querySelectorAll("[data-pron]").forEach(c=>c.onchange=()=>{          // "None" clears the others; ticking one clears "None"
+    if(c.dataset.pron===""){ if(c.checked) L.pron=[]; }
+    else L.pron=[...el.querySelectorAll("[data-pron]")].filter(x=>x.dataset.pron&&x.checked).map(x=>x.dataset.pron);
+    touch(); });
+  if($("copyb")) $("copyb").onclick=async()=>{
+    const P=promptFor(); if(!P) return;
+    $("ptext").value=P.p; const ok=await copyText(P.p);
+    $("copymsg").textContent=ok?`✓ Copied (${P.s?P.s+" sentences, ":""}${P.w} words). Now paste it in the AI chat.`:"⚠ Could not copy: open “More options → Show the prompt” and copy it from there.";
+  };
+  if($("showp")) $("showp").onclick=()=>{ const P=promptFor(); const t=$("ptext"); t.value=P?P.p:""; t.style.display=""; t.select(); };
+  const ans=$("answer");
+  if(ans){
+    const add=()=>{ if(!ans.value.trim()) return; addAnswer(ans.value); };
+    ans.addEventListener("paste",()=>setTimeout(add,0)); $("addans").onclick=add; dropText(ans,t=>addAnswer(t));
+  }
+}
+// Translations are kept by position (one per language), so when the languages change, each column moves with its language.
+// A language that is taken away goes to the archive (L.removed) and comes back if it is added again.
+function setLangs(list){
+  const lc=x=>x.toLowerCase(), at=(arr,l)=>arr.findIndex(o=>lc(o)==lc(l));
+  const neu=list.filter((l,i,a)=>l&&at(a,l)==i), old=L.langs; if(!neu.length) neu.push("English");
+  if(neu.length==old.length && neu.every((l,j)=>lc(l)==lc(old[j]))){ L.langs=neu; return; }
+  const secs=()=>Object.fromEntries(Object.values(L.tabs.custom).flatMap(tb=>(tb.secs||[]).map(x=>[x.id,x.tr||[]])));
+  if(old.some(o=>at(neu,o)<0)) L.removed.push({when:Date.now(),langs:old.slice(),sents:L.sents.map(s=>({t:s.t,tr:s.tr})),
+    words:Object.fromEntries(Object.entries(L.words).map(([k,w])=>[k,w.tr])),secs:secs()});
+  const back=(l,key)=>{ const A=[...L.removed].reverse().find(x=>x.langs&&at(x.langs,l)>=0); if(!A) return "";
+    const tr=key.s!=null?(A.sents.find(x=>x.t===key.s)||{}).tr:key.w!=null?A.words[key.w]:(A.secs||{})[key.sec];
+    return (tr||[])[at(A.langs,l)]||""; };
+  const col=(tr,key)=>neu.map(l=>{ const j=at(old,l); return j>=0?((tr||[])[j]||""):back(l,key); });
+  L.sents.forEach(s=>s.tr=col(s.tr,{s:s.t}));
+  Object.entries(L.words).forEach(([k,w])=>w.tr=col(w.tr,{w:k}));
+  Object.values(L.tabs.custom).forEach(tb=>(tb.secs||[]).forEach(x=>x.tr=col(x.tr,{sec:x.id})));
+  L.langs=neu;
+}
+function addAnswer(t){
+  const r=parseAnswer(t), left=missS().length+missW().length;
+  if(!r.s && !r.w && /Reply ONLY with lines in this exact format/.test(t)){ ansMsg="⚠ This is the prompt, not the AI's answer. Paste the prompt in the AI chat, then copy the AI's answer and paste that here."; renderSetup(); return; }
+  if(!r.s && !r.w) ansMsg="⚠ I found no translations in what you pasted. Copy the AI's whole answer (its lines start with S or W) and paste again. If the AI wrote something else, tell it: “Please answer only with the lines in the format I asked.”";
+  else ansMsg=`✓ Added ${[r.s?`${r.s} sentence translation${r.s>1?"s":""}`:"",r.w?`${r.w} word${r.w>1?"s":""}`:""].filter(Boolean).join(" and ")}.`+(r.bad?` (${r.bad} line${r.bad>1?"s were":" was"} not understood and ${r.bad>1?"were":"was"} skipped.)`:"")+
+    (left?(!r.end?" The answer seems cut off: no problem, what is missing goes into the next prompt.":"")+" Next: click 📋 Copy the next prompt again.":" All done!");
+  touch();
+}
+function dropText(el,fn){   // drag a .txt file onto a box
+  el.addEventListener("dragover",e=>{ if(e.dataTransfer && [...e.dataTransfer.types].includes("Files")) e.preventDefault(); });
+  el.addEventListener("drop",e=>{ const f=e.dataTransfer&&e.dataTransfer.files[0]; if(!f) return; e.preventDefault(); const r=new FileReader(); r.onload=()=>fn(String(r.result)); r.readAsText(f); });
+}
+
+// ---------------------------------------------------------------- your own tabs (sections with text, translation, answer)
+const TB=()=>L.tabs;
+const BUILTIN=[{id:"read",title:"Text"},{id:"words",title:"Words"},{id:"setup",title:"✨ Setup"}].filter(b=>!(RO&&b.id=="setup"));
+const docBox=(a,attr)=>`<div class="box"><h3><span>${esc(a.title||"")}</span> <button class="ed" ${attr}>✎ edit</button></h3>
+  <div>${md(a.text||"")}</div>
+  ${a.ans?`<p><button class="show">Answer</button></p><div class="hid ans">${md(a.ans)}</div>`:""}
+  ${(a.tr||[]).some(Boolean)?`<p><button class="show">Translation</button></p><div class="hid">${L.langs.map((lg,j)=>a.tr[j]?`<div class="trl"><span class="lab">${esc(lg)}</span><div dir="auto">${md(a.tr[j])}</div></div>`:"").join("")}</div>`:""}
+</div>`;
+function renderCustom(){
+  const main=document.querySelector("main");
+  main.querySelectorAll("section.view.custom").forEach(x=>x.remove());
+  Object.entries(TB().custom).forEach(([id,tb])=>{
+    const sec=document.createElement("section"); sec.className="view custom"; sec.id="v-"+id;
+    sec.innerHTML=`<div class="doc"><div class="inner">${(tb.secs||[]).map(s=>docBox(s,`data-ec="${id}|${esc(s.id)}"`)).join("")||
+      `<p class="meta">This tab is empty.${RO?"":" Click ✎ Edit (top right), then “+ add a section”."}</p>`}<p><button class="ed" data-ec="${id}|__new">+ add a section</button></p></div></div>`;
+    main.appendChild(sec); wordify(sec);
+  });
+}
+document.addEventListener("click",e=>{ const c=e.target.closest("[data-ec]"); if(c){ const [t,s]=c.dataset.ec.split("|"); editSec(t,s); } });
+function editSec(tid,sid){
+  const tb=TB().custom[tid]; if(!tb) return; tb.secs=tb.secs||[];
+  const isNew=sid=="__new", sec=isNew?{id:"s"+Date.now(),title:"",text:"",tr:[],ans:""}:tb.secs.find(s=>s.id==sid); if(!sec) return;
+  openEditor(`${tb.title}: ${isNew?"new section":"section"}`,[
+    {k:"title",label:"Title",val:sec.title,rows:1},
+    {k:"text",label:"Text",val:sec.text,rows:7,help:"**bold**, *italic*"},
+    ...L.langs.map((lg,j)=>({k:"t"+j,label:`Translation: ${lg}`,val:(sec.tr||[])[j]||"",rows:3,help:"optional; hidden behind a “Translation” button"})),
+    {k:"ans",label:"Answer",val:sec.ans||"",rows:3,help:"optional; hidden behind an “Answer” button (for questions and exercises)"}],
+    v=>{ Object.assign(sec,{title:v.title.trim(),text:v.text,tr:L.langs.map((_,j)=>v["t"+j]),ans:v.ans}); if(isNew) tb.secs.push(sec); touch(); },
+    isNew?null:{remove:["Remove this section","Remove this section? (It is kept in the file's archive.)",()=>{ L.removed.push({when:Date.now(),tab:tb.title,section:sec}); tb.secs=tb.secs.filter(x=>x!==sec); touch(); }]});
+}
+const nav=$("tabs");
+function tabList(){
+  const ids=[...BUILTIN.map(b=>b.id),...Object.keys(TB().custom)];
+  const order=(TB().order||[]).filter(id=>ids.includes(id)); ids.forEach(id=>{ if(!order.includes(id)) order.push(id); });
+  return order.map(id=>({id,custom:!!TB().custom[id],title:TB().titles[id]||(TB().custom[id]||{}).title||(BUILTIN.find(b=>b.id==id)||{}).title||id}));
+}
+function renderNav(){
+  nav.innerHTML=tabList().map(tb=>`<button data-v="${tb.id}" draggable="${!RO}" class="${view==tb.id?"on":""}" title="${RO?"":"Drag to move"}">${esc(tb.title)}${tb.custom?`<span class="tabx ed" data-rmtab="${tb.id}" title="Remove this tab">×</span>`:""}</button>`).join("")
+    +(RO?"":`<button id="addtab" title="Add a tab of your own (author, exercises, vocabulary…)">+</button>`);
+}
+let dragId=null;
+nav.addEventListener("click",e=>{
+  const rm=e.target.closest("[data-rmtab]");
+  if(rm){ e.stopPropagation(); const id=rm.dataset.rmtab, tb=TB().custom[id];
+    if(tb && confirm(`Remove the tab “${tb.title}”?\n\nIts content is kept in the file's archive.`)){
+      TB().archived[id]=tb; delete TB().custom[id]; TB().order=tabList().map(x=>x.id); if(view==id) view="read"; touch(); }
+    return; }
+  if(e.target.closest("#addtab")){
+    const name=prompt("Name of the new tab (for example: Author, Exercises, Vocabulary):"); if(!name||!name.trim()) return;
+    const id="t"+Date.now(); TB().custom[id]={title:name.trim(),secs:[]}; TB().order=tabList().map(x=>x.id);
+    view=id; touch(); editSec(id,"__new"); return; }
+  const b=e.target.closest("[data-v]"); if(b) show(b.dataset.v);
+});
+nav.addEventListener("dblclick",e=>{
+  const b=e.target.closest("[data-v]"); if(!b||RO||!document.body.classList.contains("editing")) return;
+  const id=b.dataset.v, was=tabList().find(x=>x.id==id).title, name=prompt("Tab name:",was);
+  if(!name||!name.trim()||name.trim()==was) return;
+  if(TB().custom[id]) TB().custom[id].title=name.trim(); else TB().titles[id]=name.trim(); touch();
+});
+nav.addEventListener("dragstart",e=>{ const b=e.target.closest("[data-v]"); if(!b) return; dragId=b.dataset.v; e.dataTransfer.setData("text/plain",dragId); e.dataTransfer.effectAllowed="move"; b.classList.add("dragging"); });
+const clearDrop=()=>nav.querySelectorAll("button").forEach(x=>x.classList.remove("dropL","dropR","dragging"));
+const leftHalf=(e,b)=>{ const r=b.getBoundingClientRect(); return e.clientX<r.left+r.width/2; };
+nav.addEventListener("dragover",e=>{ const b=e.target.closest("[data-v]"); if(!b||!dragId) return; e.preventDefault(); nav.querySelectorAll("button").forEach(x=>x.classList.remove("dropL","dropR")); b.classList.add(leftHalf(e,b)?"dropL":"dropR"); });
+nav.addEventListener("dragend",()=>{ clearDrop(); dragId=null; });
+nav.addEventListener("drop",e=>{
+  const b=e.target.closest("[data-v]"); if(!b||!dragId) return; e.preventDefault();
+  const order=tabList().map(x=>x.id).filter(id=>id!==dragId); let at=order.indexOf(b.dataset.v); if(at<0){ clearDrop(); return; }
+  if(!leftHalf(e,b)) at++; order.splice(at,0,dragId); clearDrop(); dragId=null; TB().order=order; touch();
+});
+
+// ---------------------------------------------------------------- views, banner, tools
+let view="read";
+function show(v){
+  if(!$("v-"+v)) v="read";
+  view=v; document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on",x.id=="v-"+v));
+  nav.querySelectorAll("[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v==v));
+  if(!RO) ls.set("lm:view:"+L.id,v);
+}
+function renderTitle(){ $("ptitle").textContent=L.title||(RO?"Lesson":"Lesson Maker"); document.title=(L.title||"Lesson Maker")+(CLASS?" – class screen":""); }
+$("edtitle").onclick=()=>openEditor("Title",[{k:"t",label:"Title of the lesson",val:L.title,rows:1}],v=>{ L.title=v.t.trim(); touch(); });
+function renderBanner(){
+  const b=$("banner");
+  if(!BANNER){ b.classList.remove("on"); b.innerHTML=""; return; }
+  b.classList.add("on");
+  if(BANNER.kind=="local"){
+    b.innerHTML=`ℹ️ You are seeing your latest changes, kept in this browser. They are newer than this file: click <b>💾 Save</b> to put them in a file. <button id="bfile">Show the file's version instead</button> <button id="bok">OK</button>`;
+    $("bok").onclick=()=>{ BANNER=null; renderBanner(); };
+    $("bfile").onclick=()=>{ if(!confirm("Show the version saved in this file instead? The newer changes you see now will be replaced and will no longer be offered.\n\nTo keep them, click Cancel and 💾 Save them first.")) return;
+      ls.set("lm:"+L.id+":backup",L); L=BANNER.fileL; BANNER=null; ls.set("lm:"+L.id,L); srcDirty=false; textMsg=ansMsg=""; renderAll(); go(cur); sendLesson(); };
+  }else{
+    const d=BANNER.d, name=`“${esc(d.title||"a lesson without a title")}” (${d.sents.length} sentence${d.sents.length==1?"":"s"})`, dl=ls.get("lm:dl:"+d.id,0)>=d.t;
+    b.innerHTML=(dl?`ℹ️ Last time you worked on ${name} and saved it as a file (look in your Downloads folder; double-click it to continue).`
+      :`ℹ️ You were working on ${name}; its latest changes are not in a file yet.`)+` <button id="bcont">Continue it${dl?" here":""}</button> <button id="bnew">Start a new lesson</button>`;
+    $("bcont").onclick=()=>{
+      if(L.sents.length && !confirm(`Leave “${L.title||"the lesson on screen"}” and continue the older one? The one on screen will no longer be offered here.\n\nTo keep it, click Cancel and 💾 Save it first.`)) return;
+      L=BANNER.d; BANNER=null; srcDirty=false; textMsg=ansMsg=""; asked=null; ls.set("lm:draft",L.id);
+      cur=ls.get("lm:cur:"+L.id,0); view=ls.get("lm:view:"+L.id,"read"); renderAll(); go(cur); };
+    $("bnew").onclick=()=>{ if(confirm(`Start a new lesson? “${d.title||"The last lesson"}” will no longer be offered here.`+(dl?"":"\n\nIts latest changes are not in a file: to keep them, click Cancel, then “Continue it” and 💾 Save."))){
+      ls.del("lm:draft"); BANNER=null; renderBanner(); } };
+  }
+}
+function renderAll(){ cur=Math.max(0,Math.min(cur,L.sents.length-1)); renderTitle(); renderNav(); renderBanner(); renderText(); renderPanel(); renderWords(); renderSetup(); renderCustom(); show(view); updSave(); }
+let fs=ls.get("lm_fs",26);
+function setFs(v){ fs=Math.max(14,Math.min(56,v)); document.documentElement.style.setProperty("--fs",fs+"px"); ls.set("lm_fs",fs); }
+setFs(fs);
+$("fsm").onclick=()=>setFs(fs-2); $("fsp").onclick=()=>setFs(fs+2);
+const toggleNums=()=>{ const on=document.body.classList.toggle("nums"); $("numb").classList.toggle("on",on); ls.set("lm_nums",on); };
+$("numb").onclick=toggleNums; if(ls.get("lm_nums",false)) toggleNums();
+function toggleEdit(){ const on=document.body.classList.toggle("editing"); $("editb").classList.toggle("on",on); tip.style.display="none"; }
+$("editb").onclick=toggleEdit; $("editdone").onclick=toggleEdit;
+$("saveb").onclick=()=>saveFile(false);
+$("pkgb").onclick=()=>{ if(confirm("Make a read-only copy of this lesson, as one file, to send to someone else (or to use on another computer)?\n\nIt cannot be edited. Your own lesson file stays as it is.")) saveFile(true); };
+if(RO){ ["editb","saveb","pkgb","edtitle"].forEach(id=>$(id).style.display="none"); document.body.classList.add("ro"); }
+
+// ---------------------------------------------------------------- the guide (also in README.md)
+const GUIDE=`<h2>📖 Guide: from a text to a lesson</h2>
+<p class="noro">You need: this file, a text (typed, or copied from a web page or a PDF), and a free AI chat such as <b>chatgpt.com</b> or <b>gemini.google.com</b> (no paid plan needed).</p>
+<p class="onlyro"><b>This is a read-only copy of a lesson:</b> you can teach with it, not change it.</p>
+<div class="noro"><h3>A. Make the lesson (once per text)</h3>
+<ol>
+<li>Open the <b>✨ Setup</b> tab (top).</li>
+<li><b>Step 1:</b> type a title, the language of the text, and the language(s) to translate into. Tick the alphabets for the pronunciation of words (one, several, or None).
+  If you tick another alphabet later, 📋 asks the AI for it.</li>
+<li><b>Step 2:</b> click in the big box and paste the text (<kbd>Cmd</kbd>+<kbd>V</kbd>; on Windows <kbd>Ctrl</kbd>+<kbd>V</kbd>). It is cut into sentences, one per line.
+  Fix any line that is wrong (<kbd>Enter</kbd> cuts a line; deleting a line break joins two). An empty line = a new paragraph. Click <b>✓ Use this text</b>.
+  (If you paste more text next to lines already there, click <b>✂ Cut into sentences again</b>.)</li>
+<li><b>Step 3</b> (translations):
+  <ol type="a"><li>Click <b>📋 Copy the next prompt</b>.</li>
+  <li>Open the AI chat in another browser tab, click in its message box, paste, and send.</li>
+  <li>When the answer is finished (its last line is END), copy it with the AI's copy button: at the top right of the grey box (two small squares, or the word Copy), or under the answer.</li>
+  <li>Come back and paste it in the box under the instructions. Both bars fill up: done, usually in one round.
+     Only if a long answer stopped before the end, click 📋 again: the new prompt asks just for what is missing.
+     A translation you corrected by hand is never replaced by a later answer.</li></ol></li>
+<li>Click <b>💾 Save</b> (top right). The lesson is now one file (Safari and Firefox put it in your <b>Downloads</b> folder; Chrome and Edge ask where to put it).
+  Rename it or move it if you like. Double-click it to open it again.</li>
+</ol></div>
+<h3>B. Teach with it</h3>
+<ul>
+<li><b>Text</b> tab: the current sentence is highlighted in yellow. Next: <kbd>→</kbd> or <kbd>Space</kbd>. Back: <kbd>←</kbd>. Or click any sentence.</li>
+<li>Rest the mouse on any word: its translation and pronunciation appear.</li>
+<li>Side panel, <b>Show</b> box: 👁 shows the translation or the notes <b>to you</b>; 📽 shows them <b>to the class</b>. Keys: <kbd>T</kbd> / <kbd>N</kbd> for you, <kbd>Shift</kbd>+<kbd>T</kbd> / <kbd>Shift</kbd>+<kbd>N</kbd> for the class.</li>
+<li><b>A−</b> / <b>A+</b>: text size. <b>#</b>: sentence numbers. <b>Words</b> tab: every word of the text with its translation.</li>
+</ul>
+<h3>C. With a projector (the class sees a clean screen, you keep the answers)</h3>
+<ol>
+<li>Connect the projector. On a Mac: Apple menu → System Settings → Displays → choose the projector → “Extended display” (not “Mirror”).
+  On Windows: press the Windows key + <kbd>P</kbd> and choose “Extend” (not “Duplicate”).</li>
+<li>Click <b>📽 Class screen</b>. A second window opens (if not, allow pop-ups for this file and click again).</li>
+<li>Drag that window onto the projector and click its <b>⛶ Full screen</b> button. The dot next to 📽 turns green when both windows are linked.</li>
+<li>Teach from your own window. Click a word of the current sentence to show it, with its meaning, to the class. <kbd>Esc</kbd> clears the class screen.
+  To change the size of the class screen's text, click on its window, then press <kbd>+</kbd> or <kbd>−</kbd>.</li>
+</ol>
+<div class="noro"><h3>D. Change things (✎ Edit)</h3>
+<ul>
+<li>Click <b>✎ Edit</b>. Yellow ✎ buttons appear. Click <b>✓ Done editing</b> when finished.</li>
+<li><b>A word's pop-up:</b> click the word, change it, Save.</li>
+<li><b>A translation:</b> “✎ edit” next to Translation.</li>
+<li><b>A sentence:</b> “✎ Edit this sentence”: fix the text, cut it in two (<kbd>Enter</kbd>), join it with the next one, or start a new paragraph.</li>
+<li><b>Notes:</b> “✎ add / edit notes”, then choose a kind of note (💬 Expression, 📘 Grammar, 🌱 Word origin, ❓ Question, 🌍 Culture, ✏️ Other).
+  A ready-made sentence appears: replace each … with your words. Click a word of the sentence to put it in bold. <b>B</b> / <i>I</i> = bold / italic.</li>
+<li><b>Tabs:</b> <b>+</b> adds a tab (author, exercises, vocabulary…) with sections; each section can have a hidden translation and a hidden answer.
+  Drag a tab to move it. In edit mode, double-click a tab to rename it; × removes your own tabs.</li>
+<li><b>Title:</b> the ✎ next to it.</li>
+</ul>
+<h3>E. Keep and share</h3>
+<ul>
+<li>Every change is kept in this browser at once. <b>💾 Save</b> puts it in a file (the button turns orange when there is something new to save).
+  In Safari and Firefox each save makes a new file in Downloads (“name (1).html”, …): the newest is the one to keep.
+  In Chrome and Edge a Save window opens the first time you save after opening the lesson: choose the lesson's own file and click Replace.</li>
+<li><b>📦 Package</b>: a read-only copy, one file, to send by e-mail, WhatsApp or USB. It opens by double-click on any computer (not on phones).</li>
+<li>For a new text, open the empty <b>lesson_maker.html</b> again.</li>
+</ul></div>
+<h3>Keys</h3>
+<table><tr><td><kbd>→</kbd> <kbd>Space</kbd> / <kbd>←</kbd></td><td>next / previous sentence</td></tr>
+<tr><td><kbd>↓</kbd> <kbd>PageDown</kbd> / <kbd>↑</kbd> <kbd>PageUp</kbd></td><td>next / previous (a presentation clicker works too)</td></tr>
+<tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>first / last sentence</td></tr>
+<tr><td><kbd>T</kbd> <kbd>N</kbd></td><td>translation / notes, to me</td></tr>
+<tr><td><kbd>Shift</kbd>+<kbd>T</kbd> <kbd>Shift</kbd>+<kbd>N</kbd></td><td>translation / notes, to the class</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>clear the class screen</td></tr>
+<tr><td><kbd>+</kbd> <kbd>−</kbd> <kbd>#</kbd></td><td>text size, sentence numbers</td></tr>
+<tr><td><kbd>1</kbd>…<kbd>9</kbd></td><td>open tab 1…9</td></tr>
+<tr><td><span class="noro"><kbd>E</kbd> </span><kbd>?</kbd></td><td><span class="noro">edit mode, </span>this guide</td></tr>
+<tr><td><kbd>F</kbd> (on the class screen)</td><td>full screen</td></tr></table>
+<p class="meta">The letter keys also work with a Hebrew keyboard (the key where T is, and so on).</p>
+<h3>If something goes wrong</h3>
+<ul>
+<li class="noro"><b>The AI wrote explanations, a table, or everything as one long paragraph:</b> paste it anyway, it usually works. If not, tell the AI: “Please answer only with the lines in the format I asked.”</li>
+<li class="noro"><b>“This is the prompt, not the AI's answer”:</b> you pasted the prompt back. Copy the AI's answer instead.</li>
+<li class="noro"><b>“I found no translations”:</b> the AI did not answer with S / W lines. Tell it: “Please answer only with the lines in the format I asked.”, then copy its new answer.</li>
+<li><b>The class screen does not open:</b> allow pop-ups for this file in the browser, then click 📽 again.</li>
+<li class="noro"><b>A word has no pop-up:</b> ✎ Edit, click the word, type its meaning.</li>
+</ul>
+<div class="row"><button class="primary" id="gclose">Close</button></div>`;
+function showGuide(){ openModal(GUIDE,true); $("gclose").onclick=closeModal; }
+$("helpb").onclick=showGuide;
+document.addEventListener("click",e=>{ if(e.target.closest("[data-guide]")){ e.preventDefault(); showGuide(); } });
+
+// ---------------------------------------------------------------- class (projector) window
+// Same method as the reveal.js speaker view: this page opens the class window and drives it with postMessage,
+// which works between local files (file://). The class window says "hello" every second; this page answers with
+// the lesson (when the class window does not have the latest one) and the current state.
+const CST={show:{t:false,n:false},word:null};
+let classWin=null, lastHello=0;
+const classAlive=()=>Date.now()-lastHello<3000;
+function sendState(){ if(classWin) try{ classWin.postMessage({ns:"lm",type:"state",st:{cur,show:CST.show,word:CST.word}},"*"); }catch(e){} }
+function sendLesson(){ if(classWin) try{ classWin.postMessage({ns:"lm",type:"lesson",L:JSON.parse(JSON.stringify(L))},"*"); }catch(e){} }
+function setCST(ch){ Object.assign(CST,ch); renderPanel(); sendState(); }
+function toggleClass(id){ setCST({show:Object.assign({},CST.show,{[id]:!CST.show[id]})}); }
+function updProj(){ const d=$("projdot"), on=classAlive(); d.textContent=on?"●":"○"; d.classList.toggle("on",on); }
+if(!CLASS){
+  window.addEventListener("message",e=>{
+    const d=e.data; if(!d||d.ns!=="lm") return;
+    if(d.type==="hello"){ const first=!classAlive(); classWin=e.source; lastHello=Date.now(); if(d.have!==(L.t||1)) sendLesson(); sendState(); updProj(); if(first) renderPanel(); }
+    else if(d.type==="key" && e.source===classWin && !["?","e","E"].includes(d.key) && d.code!=="KeyE") handleKey({key:d.key,code:d.code,shiftKey:d.shift,target:document.body,preventDefault(){}});
+  });
+  setInterval(()=>{ const was=$("projdot").classList.contains("on"); updProj(); if(was!==classAlive()) renderPanel(); },1000);
+  $("projb").onclick=()=>{
+    if(!L.sents.length){ alert("Add a text first (✨ Setup)."); return; }
+    if(classWin && !classWin.closed && classAlive()){ try{ classWin.focus(); }catch(e){} return; }
+    const w=window.open(location.href.split(/[?#]/)[0]+"?view=class","lm_class","popup=yes,width=1200,height=800");
+    if(w) classWin=w; else alert("The browser blocked the window. Allow pop-ups for this file, then click 📽 again.");
+  };
+}
+function classMain(){
+  document.body.classList.add("classmode"); document.title="Class screen";
+  const ctext=$("ctext"), cbar=$("cbar"), cstat=$("cstat");
+  let cfs=ls.get("lm_cfs",40); const setC=v=>{ cfs=Math.max(20,Math.min(90,v)); document.documentElement.style.setProperty("--cfs",cfs+"px"); ls.set("lm_cfs",cfs); }; setC(cfs);
+  let have=0, st=null, cs=[], last="", lastCur=-1, lastState=0;
+  function build(){
+    let h="<p>"; L.sents.forEach((s,i)=>{ if(i&&s.np) h+="</p><p>"; h+=`<span class="s" data-i="${i}">${tokenize(s.t)}</span> `; });
+    ctext.innerHTML=h+"</p>"; cs=[...ctext.querySelectorAll(".s")]; last=""; lastCur=-1; renderTitle();
+  }
+  function render(){
+    if(!have||!st) return; const s=L.sents[st.cur];
+    if(!s){ cbar.innerHTML=""; last=""; cs.forEach(sp=>sp.classList.remove("cur","read")); return; }   // no sentence (all removed): clear the bar
+    const key=JSON.stringify(st); if(key===last) return; last=key;
+    cs.forEach((sp,k)=>{ sp.classList.toggle("cur",k==st.cur); sp.classList.toggle("read",k<st.cur); sp.querySelectorAll(".w.spot").forEach(w=>w.classList.remove("spot")); });
+    const ws=[...cs[st.cur].querySelectorAll(".w")];
+    if(st.word && ws[st.word.i]) ws[st.word.i].classList.add("spot");
+    let bar="";
+    if(st.word){ const g=L.words[st.word.k]||{tr:[]}; bar+=`<div class="row"><span class="cw"><b>${esc(st.word.f)}</b> = ${L.langs.map((_,j)=>g.tr[j]?`<span dir="auto">${esc(g.tr[j])}</span>`:"").filter(Boolean).join(" · ")||"?"} ${pronVals(g).some(Boolean)?`<span class="etr">🔊 ${pronVals(g).filter(Boolean).map(v=>`<span dir="auto">${esc(v)}</span>`).join(" · ")}</span>`:""}</span></div>`; }
+    if(st.show.t) bar+=`<div class="row">${L.langs.map((_,j)=>(s.tr||[])[j]?`<div class="ctr" dir="auto">${esc(s.tr[j])}</div>`:"").join("")}</div>`;
+    if(st.show.n) bar+=`<div class="row"><span class="lab">Notes</span><ul class="notes">${(s.n||[]).map(n=>`<li>${tagH(n[0])}${md(n[1])}</li>`).join("")||"<li>—</li>"}</ul></div>`;
+    cbar.innerHTML=bar;
+    if(st.cur!==lastCur){ lastCur=st.cur; }
+    requestAnimationFrame(()=>cs[st.cur].scrollIntoView({block:"center",behavior:"smooth"}));
+  }
+  window.addEventListener("message",e=>{ const d=e.data; if(!d||d.ns!=="lm"||e.source!==window.opener) return;
+    if(d.type==="lesson"){ L=fix(d.L); have=L.t||1; build(); }
+    if(d.type==="state"){ lastState=Date.now(); st=d.st; }
+    render(); });
+  const hello=()=>{ if(window.opener && !window.opener.closed) try{ window.opener.postMessage({ns:"lm",type:"hello",have},"*"); }catch(e){} };
+  hello(); setInterval(hello,1000);
+  setInterval(()=>{ cstat.textContent=!window.opener?"Open this screen from the lesson page (📽 Class screen).":(Date.now()-lastState<3000?"":"⚠ not linked to the lesson page"); $("ctools").classList.toggle("warn",!!cstat.textContent); },1000);
+  const fsb=()=>{ if(document.fullscreenElement||document.webkitFullscreenElement) (document.exitFullscreen||document.webkitExitFullscreen).call(document); else (document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen).call(document.documentElement); };
+  $("cfs").onclick=fsb;
+  document.addEventListener("keydown",e=>{
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    if(e.key=="+"||e.key=="=") return setC(cfs+4); if(e.key=="-") return setC(cfs-4);
+    if(e.key=="f"||e.key=="F"||e.code=="KeyF") return fsb();
+    if([" ","ArrowRight","ArrowLeft","ArrowUp","ArrowDown","PageUp","PageDown"].includes(e.key)) e.preventDefault();
+    if(window.opener) try{ window.opener.postMessage({ns:"lm",type:"key",key:e.key,code:e.code,shift:e.shiftKey},"*"); }catch(err){}
+  });
+}
+
+// ---------------------------------------------------------------- keys
+function handleKey(e){
+  // With a Hebrew (or other non-Latin) keyboard, a letter key counts as the Latin key at the same place: א is T, ק is E.
+  // On a French (AZERTY) keyboard the top-row keys count as 1…9 without Shift.
+  const c=e.code||"", k=/^[^\x00-\x7f]$/.test(e.key||"")&&/^Key[A-Z]$/.test(c)?c.slice(3).toLowerCase():e.key, low=(k||"").toLowerCase(), tl=tabList();
+  const dg=/^[1-9]$/.test(k)?k:(!e.shiftKey&&/^Digit[1-9]$/.test(c)?c.slice(5):null);
+  if(dg){ if(tl[+dg-1]) show(tl[+dg-1].id); return; }
+  if(k=="+"||k=="=") return setFs(fs+2); if(k=="-") return setFs(fs-2);
+  if(k=="#") return toggleNums();
+  if(k=="?") return showGuide();
+  if(low=="e" && !RO) return toggleEdit();
+  if(k=="Escape"){ if(CST.word||CST.show.t||CST.show.n) setCST({word:null,show:{t:false,n:false}}); return; }
+  if(view!="read"||!L.sents.length) return;
+  if(k=="ArrowRight"||k==" "||k=="ArrowDown"||k=="PageDown"){ e.preventDefault(); go(cur+1); }
+  else if(k=="ArrowLeft"||k=="ArrowUp"||k=="PageUp"){ e.preventDefault(); go(cur-1); }
+  else if(low=="t"||low=="n"){ if(e.shiftKey) toggleClass(low); else toggle(low); }
+  else if(k=="Home") go(0); else if(k=="End") go(L.sents.length-1);
+}
+if(!CLASS) document.addEventListener("keydown",e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(modal.classList.contains("on")){ if(e.key=="Escape" && modalSoft) closeModal(); return; }
+  const a=document.activeElement||{};                // typing in a field: not a shortcut (a ticked checkbox does not count)
+  if(/^(TEXTAREA|SELECT)$/.test(a.tagName||"")||a.isContentEditable||(a.tagName=="INPUT"&&!/^(checkbox|radio|button|submit|reset)$/i.test(a.type))) return;
+  handleKey(e);
+});
+
+// ---------------------------------------------------------------- start
+if(CLASS){ classMain(); return; }
+cur=Math.min(ls.get("lm:cur:"+L.id,0),Math.max(0,L.sents.length-1));
+view=L.sents.length?ls.get("lm:view:"+L.id,"read"):(RO?"read":"setup");
+renderAll(); if(L.sents.length) go(cur);
+})();
+</script>
+</body>
+</html>

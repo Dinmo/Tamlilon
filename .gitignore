@@ -1,0 +1,6 @@
+# Lessons saved from the tool contain their text (often copyrighted): never publish them.
+# Only the empty tool and the website pages are tracked.
+*.html
+!tamlilon.html
+!index.html
+.DS_Store
