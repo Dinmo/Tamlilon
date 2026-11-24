@@ -9,14 +9,16 @@
 Paste a text in any foreign language: every word gets a pop-up translation, every sentence a translation you reveal
 when you want, and the class can follow on a projector. Free, one file, works without internet.</p>
 
-<p align="center"><a href="https://dinmo.github.io/tamlilon/"><b>▶ Open Tamlilon</b></a> &nbsp;·&nbsp;
-<a href="https://dinmo.github.io/tamlilon/"><b>⬇ Download it</b></a> &nbsp;·&nbsp;
-<a href="https://dinmo.github.io/tamlilon/#he" dir="rtl" lang="he">בעברית</a></p>
+<p align="center"><a href="https://dinmo.github.io/Tamlilon/"><b>▶ Open Tamlilon</b></a> &nbsp;·&nbsp;
+<a href="https://dinmo.github.io/Tamlilon/"><b>⬇ Download it</b></a> &nbsp;·&nbsp;
+<a href="https://dinmo.github.io/Tamlilon/#he" dir="rtl" lang="he">בעברית</a></p>
 
 ## Start in 3 steps
 
-1. **Open it.** Go to **[dinmo.github.io/tamlilon](https://dinmo.github.io/tamlilon/)** and click the big blue button
-   **Open Tamlilon**. Or click **Download** there and double-click the file you get: it opens in your web browser.
+1. **Open it.** Go to **[dinmo.github.io/Tamlilon](https://dinmo.github.io/Tamlilon/)** and click the big blue button
+   **Open Tamlilon** to use it online.
+   **To keep it on your computer,** click **Download** there instead: one file, `tamlilon.html`, goes to your Downloads
+   folder (move it to your Desktop if you like). Double-click it: Tamlilon opens in your web browser, even without internet.
 2. **Paste your text, then let a free AI translate it.** Paste your text in the big box. Click **📋 Copy the next prompt**,
    paste it into a free AI chat ([chatgpt.com](https://chatgpt.com) or [gemini.google.com](https://gemini.google.com))
    and send. Copy its answer and paste it back into Tamlilon.
@@ -25,7 +27,8 @@ when you want, and the class can follow on a projector. Free, one file, works wi
 
 <p align="center"><img src="assets/step3.jpg" alt="A lesson in Tamlilon: the current sentence, a word's pop-up translation, and the sentence's translation" width="760"></p>
 
-Works on a computer (Windows or Mac) in Chrome, Edge, Safari or Firefox; not on phones or tablets.
+Works on a computer (Windows, Mac or Linux) in Chrome, Edge, Safari or Firefox; not on phones or tablets.
+The downloaded file needs no internet and no installation: only the translation step uses a free AI chat online.
 Your texts stay on your computer: Tamlilon sends nothing anywhere (only what you paste into the AI chat yourself goes there).
 
 ---
@@ -79,7 +82,7 @@ The same guide is inside the tool: click **? Guide** (top right).
 
 1. Connect the projector. On a Mac: **Apple menu → System Settings → Displays →** choose the projector **→ “Extended display”**
    (not “Mirror”: mirroring would show your notes to the class). On Windows: press the Windows key + <kbd>P</kbd> and
-   choose **“Extend”** (not “Duplicate”).
+   choose **“Extend”** (not “Duplicate”). On Linux: open the display settings and choose to **join / extend** the displays (not “Mirror”).
 2. Click **📽 Class screen**. A second window opens. If nothing opens, the browser blocked it: allow pop-ups for this file and click again.
 3. Drag that window onto the projector and click its **⛶ Full screen** button (top right corner).
 4. The dot next to 📽 turns **green** when the two windows are linked. Teach from your own window.

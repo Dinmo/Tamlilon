@@ -6,7 +6,7 @@
 <title>Tamlilon · תמלילון</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231f3d5c'/%3E%3Cpath d='M19 8h27a7 7 0 0 1 7 7v6a7 7 0 0 1-7 7H31l-7 7v-7h-5a7 7 0 0 1-7-7v-6a7 7 0 0 1 7-7z' fill='%23fff'/%3E%3Crect x='19' y='15.5' width='22' height='5' rx='2.5' fill='%231f3d5c' opacity='.3'/%3E%3Crect x='10' y='38' width='44' height='10' rx='5' fill='%23f2b632'/%3E%3Crect x='10' y='52' width='30' height='5' rx='2.5' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
 <!-- Tamlilon · תמלילון — Created by Dinmo · a Yours Truly project. © 2026 Dinmo (Yours Truly).
-     Free software under the GNU GPL-3.0 licence. Source and updates: https://github.com/Dinmo/tamlilon -->
+     Free software under the GNU GPL-3.0 licence. Source and updates: https://github.com/Dinmo/Tamlilon -->
 <style>
 :root{
   --bg:#fbfaf6; --ink:#1d1d1f; --muted:#68686e; --line:#e4e0d6; --panel:#ffffff; --soft:#f4f2ec;
@@ -722,7 +722,7 @@ function renderSetup(){
        To continue another day, double-click that file. To teach, open the <a data-go="read">Text</a> tab; the <a data-guide>guide</a> explains the class screen and the notes.</p>
   </div></div>
   <p class="credit">Tamlilon · <span lang="he" dir="rtl">תמלילון</span> — Created by Dinmo · a Yours Truly project · © 2026 Dinmo (Yours Truly) · free software (GPL-3.0) ·
-    <a href="https://github.com/Dinmo/tamlilon" target="_blank" rel="noopener">github.com/Dinmo/tamlilon</a></p>`;
+    <a href="https://github.com/Dinmo/Tamlilon" target="_blank" rel="noopener">github.com/Dinmo/Tamlilon</a></p>`;
   const ta=$("srctext"); ta.value=keep!=null?keep:sentsToText();
   ta.addEventListener("input",()=>srcDirty=true);
   ta.addEventListener("paste",()=>{ const whole=!ta.value.trim()||(ta.selectionStart===0&&ta.selectionEnd===ta.value.length); if(whole) setTimeout(()=>{ ta.value=splitText(ta.value); srcDirty=true;
@@ -984,7 +984,7 @@ const GUIDE=`<h2>📖 Guide: from a text to a lesson</h2>
 <h3>About</h3>
 <p class="credit"><b>Tamlilon</b> · <span lang="he" dir="rtl">תמלילון</span> — Created by Dinmo · a Yours Truly project.<br>
 © 2026 Dinmo (Yours Truly). Free and open-source software under the GNU GPL-3.0 licence: you may use it, share it and change it.<br>
-Updates and source: <a href="https://github.com/Dinmo/tamlilon" target="_blank" rel="noopener">github.com/Dinmo/tamlilon</a></p>
+Updates and source: <a href="https://github.com/Dinmo/Tamlilon" target="_blank" rel="noopener">github.com/Dinmo/Tamlilon</a></p>
 <div class="row"><button class="primary" id="gclose">Close</button></div>`;
 function showGuide(){ openModal(GUIDE,true); $("gclose").onclick=closeModal; }
 $("helpb").onclick=showGuide;
