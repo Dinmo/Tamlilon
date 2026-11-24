@@ -1,19 +1,42 @@
-# Lesson Maker
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/tamlilon-logo-dark.svg">
+    <img src="assets/tamlilon-logo-light.svg" alt="Tamlilon · תמלילון" width="300">
+  </picture>
+</p>
 
-Turn any text in a foreign language into an interactive reading lesson: every word has a pop-up translation, every
-sentence has a translation you reveal when you want, you can add notes, and the class can follow on a projector.
+<p align="center"><b>Any text becomes a reading lesson.</b><br>
+Paste a text in any foreign language: every word gets a pop-up translation, every sentence a translation you reveal
+when you want, and the class can follow on a projector. Free, one file, works without internet.</p>
 
-**What you need:** the file `lesson_maker.html`, a text, and a free AI chat (for example [chatgpt.com](https://chatgpt.com)
-or [gemini.google.com](https://gemini.google.com)). No paid plan, no installation, no internet needed once the lesson is made.
-Works in Safari, Firefox, Chrome and Edge on a computer (not on phones or tablets).
+<p align="center"><a href="https://dinmo.github.io/tamlilon/"><b>▶ Open Tamlilon</b></a> &nbsp;·&nbsp;
+<a href="https://dinmo.github.io/tamlilon/"><b>⬇ Download it</b></a> &nbsp;·&nbsp;
+<a href="https://dinmo.github.io/tamlilon/#he" dir="rtl" lang="he">בעברית</a></p>
 
-The same guide is inside the tool: click **? Guide** (top right).
+## Start in 3 steps
+
+1. **Open it.** Go to **[dinmo.github.io/tamlilon](https://dinmo.github.io/tamlilon/)** and click the big blue button
+   **Open Tamlilon**. Or click **Download** there and double-click the file you get: it opens in your web browser.
+2. **Paste your text, then let a free AI translate it.** Paste your text in the big box. Click **📋 Copy the next prompt**,
+   paste it into a free AI chat ([chatgpt.com](https://chatgpt.com) or [gemini.google.com](https://gemini.google.com))
+   and send. Copy its answer and paste it back into Tamlilon.
+3. **Save, and teach.** Click **💾 Save**: your lesson becomes one file. Double-click it any time to open it again.
+   Rest the mouse on a word to see its meaning.
+
+<p align="center"><img src="assets/step3.jpg" alt="A lesson in Tamlilon: the current sentence, a word's pop-up translation, and the sentence's translation" width="760"></p>
+
+Works on a computer (Windows or Mac) in Chrome, Edge, Safari or Firefox; not on phones or tablets.
+Your texts stay on your computer: Tamlilon sends nothing anywhere (only what you paste into the AI chat yourself goes there).
 
 ---
 
+# The full guide
+
+The same guide is inside the tool: click **? Guide** (top right).
+
 ## A. Make a lesson (once per text)
 
-1. **Open the tool.** Double-click `lesson_maker.html`. It opens in your web browser, on the **✨ Setup** tab.
+1. **Open the tool.** Double-click `tamlilon.html`. It opens in your web browser, on the **✨ Setup** tab.
 2. **Step 1: name and languages.** Type a title, the language of the text (e.g. *French*), and the language(s) to
    translate into (e.g. *Hebrew* and *English*; the second one is optional). Under *Pronunciation of words*, tick the
    alphabets you want the pronunciation in: English letters, Hebrew letters, both, or **None**.
@@ -98,7 +121,7 @@ translation and an answer, both hidden behind a button until you click it. Word 
 - If you open the empty tool after working on a lesson, a yellow bar offers to continue it (or to start a new one).
 - **📦 Package**: a **read-only** copy in one file, to send by e-mail, WhatsApp or USB. It opens by double-click on any
   computer, the class screen works, but it cannot be edited. It does not contain the archive (removed sentences and tabs).
-- **A new text?** Open the empty `lesson_maker.html` again. Keep this empty file as your “master copy”.
+- **A new text?** Open the empty `tamlilon.html` again. Keep this empty file as your “master copy”.
 
 ## Keys
 
@@ -170,7 +193,7 @@ The answer is plain text, one line per item, for example `S1 | <translation> | <
 
 ## How it works (for the curious)
 
-- **One file is the whole thing.** `lesson_maker.html` contains the program; a saved lesson is the same program with the
+- **One file is the whole thing.** `tamlilon.html` contains the program; a saved lesson is the same program with the
   lesson written inside it (in a block of data near the end). That is why a lesson opens by double-click, offline, on any computer.
 - **Why paste instead of text files in a folder?** A page opened by double-click is not allowed by the browser to read other
   files next to it (a security rule in all browsers). Pasting the AI's answer into the page avoids that, and is simpler.
@@ -182,3 +205,12 @@ The answer is plain text, one line per item, for example `S1 | <translation> | <
 - The class screen uses the same method as presenter views (a second window driven from the first with `postMessage`),
   which works from a double-clicked file.
 - Left out on purpose (they need a full AI pass): key words per sentence, verbs and tenses, conjugation tables.
+
+---
+
+## Credits and licence
+
+**Tamlilon** · <span dir="rtl" lang="he">תמלילון</span> — Created by **Dinmo** · a **Yours Truly** project.
+
+© 2026 Dinmo (Yours Truly). Tamlilon is free software: you can use it, share it and change it under the terms of the
+[GNU General Public License, version 3](LICENSE) (GPL-3.0).

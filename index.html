@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tamlilon · תמלילון</title>
+<meta name="description" content="Turn any text in a foreign language into an interactive reading lesson. Free, one file, works offline.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231f3d5c'/%3E%3Cpath d='M19 8h27a7 7 0 0 1 7 7v6a7 7 0 0 1-7 7H31l-7 7v-7h-5a7 7 0 0 1-7-7v-6a7 7 0 0 1 7-7z' fill='%23fff'/%3E%3Crect x='19' y='15.5' width='22' height='5' rx='2.5' fill='%231f3d5c' opacity='.3'/%3E%3Crect x='10' y='38' width='44' height='10' rx='5' fill='%23f2b632'/%3E%3Crect x='10' y='52' width='30' height='5' rx='2.5' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
+<!-- Tamlilon · תמלילון — Created by Dinmo · a Yours Truly project. © 2026 Dinmo (Yours Truly). GNU GPL-3.0. -->
+<style>
+:root{
+  --bg:#fbfaf6; --ink:#1d1d1f; --muted:#5f5f66; --line:#e4e0d6; --card:#ffffff; --soft:#f4f2ec;
+  --brand:#1f3d5c; --accent:#275882; --amber:#f2b632; --amber-ink:#a86b0c; --hl:#ffe9a8;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Noto Sans Hebrew","Arial Hebrew",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#11161c;--ink:#eef1f4;--muted:#a9b1ba;--line:#2a333d;--card:#18202a;--soft:#1e2833;--accent:#5d95c8;--amber-ink:#f2b632}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 var(--ui)}
+a{color:var(--accent)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0}
+.brand{display:flex;align-items:center;gap:12px;color:var(--brand);text-decoration:none;line-height:1.05}
+@media (prefers-color-scheme:dark){.brand{color:#fff}}
+.brand svg{width:48px;height:48px;display:block}
+.brand b{display:block;font-size:24px;letter-spacing:-.3px}
+.brand span{display:block;font-size:17px;font-weight:bold;color:var(--amber-ink)}
+.lang{display:flex;gap:4px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:3px}
+.lang button{font:inherit;font-size:16px;border:0;background:transparent;color:var(--ink);border-radius:9px;padding:6px 14px;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--brand);color:#fff}
+@media (prefers-color-scheme:dark){.lang button[aria-pressed=true]{background:var(--accent)}}
+/* hero */
+.hero{text-align:center;padding:30px 0 10px}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.15;margin:0 0 14px;letter-spacing:-.5px}
+h1 mark{background:linear-gradient(transparent 55%,var(--hl) 55%);color:inherit;padding:0 .1em}
+@media (prefers-color-scheme:dark){h1 mark{background:linear-gradient(transparent 60%,rgba(242,182,50,.45) 60%)}}
+.lead{font-size:clamp(18px,2.4vw,21px);color:var(--muted);max-width:720px;margin:0 auto 30px}
+.buttons{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.big{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:300px;padding:22px 34px;border-radius:20px;text-decoration:none;
+  font-size:28px;font-weight:bold;line-height:1.2;border:3px solid transparent;transition:transform .12s,box-shadow .12s}
+.big small{font-size:16px;font-weight:normal;margin-top:6px;opacity:.92}
+.big:hover{transform:translateY(-2px)}
+.big:focus-visible{outline:4px solid var(--amber);outline-offset:3px}
+.big.open{background:var(--brand);color:#fff;box-shadow:0 6px 0 #142a40,0 12px 24px rgba(31,61,92,.25)}
+.big.open:active{transform:translateY(3px);box-shadow:0 3px 0 #142a40}
+.big.dl{background:var(--card);color:var(--brand);border-color:var(--brand);box-shadow:0 6px 0 var(--line)}
+@media (prefers-color-scheme:dark){.big.open{background:var(--accent);box-shadow:0 6px 0 #2b4d70}.big.dl{color:#fff;border-color:var(--accent);box-shadow:0 6px 0 #0b0f14}}
+.note{font-size:15px;color:var(--muted);margin:22px auto 0;max-width:640px}
+/* steps */
+h2{font-size:30px;text-align:center;margin:64px 0 8px}
+.sub{text-align:center;color:var(--muted);margin:0 0 30px}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:30px;align-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:22px;padding:26px;margin:0 0 22px;box-shadow:0 1px 3px rgba(31,61,92,.06)}
+.num{width:52px;height:52px;border-radius:50%;background:var(--brand);color:#fff;font-size:26px;font-weight:bold;display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 -4px 0 var(--amber);margin-bottom:12px}
+@media (prefers-color-scheme:dark){.num{background:var(--accent)}}
+.step h3{font-size:25px;margin:0 0 8px;line-height:1.25}
+.step p{margin:0 0 10px}
+.step img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.10)}
+kbd{font:14px Menlo,Consolas,monospace;border:1px solid #bbb;border-bottom-width:2px;border-radius:5px;padding:0 5px;background:#fff;color:#1d1d1f}
+/* facts */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:10px 0 0}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;font-size:16px}
+.fact>b:first-child{display:block;font-size:18px;margin-bottom:4px}
+.ui{white-space:nowrap;unicode-bidi:isolate}
+.again{text-align:center;margin:44px 0 0}
+footer{margin:70px 0 0;padding:26px 0 40px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:15px;line-height:1.8}
+footer b{color:var(--ink)}
+/* languages: only the chosen one is shown */
+html[lang=en] [data-l=he],html[lang=he] [data-l=en]{display:none!important}
+@media (max-width:760px){
+  body{font-size:17px}
+  .step{grid-template-columns:1fr;padding:20px}
+  .big{min-width:0;width:100%}
+  .brand b{font-size:21px}.brand svg{width:42px;height:42px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="./"><!--logo--><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1f3d5c"/><path d="M19 8h27a7 7 0 0 1 7 7v6a7 7 0 0 1-7 7H31l-7 7v-7h-5a7 7 0 0 1-7-7v-6a7 7 0 0 1 7-7z" fill="#fff"/><rect x="19" y="15.5" width="22" height="5" rx="2.5" fill="#1f3d5c" opacity=".3"/><rect x="10" y="38" width="44" height="10" rx="5" fill="#f2b632"/><rect x="10" y="52" width="30" height="5" rx="2.5" fill="#fff" opacity=".5"/></svg><!--/logo--><span style="color:inherit"><b>Tamlilon</b><span lang="he" dir="rtl">תמלילון</span></span></a>
+    <div class="lang" role="group" aria-label="Language / שפה">
+      <button type="button" data-set="en" aria-pressed="true">English</button>
+      <button type="button" data-set="he" aria-pressed="false" lang="he">עברית</button>
+    </div>
+  </div>
+
+  <section class="hero">
+    <h1 data-l="en">Any text becomes a <mark>reading lesson</mark></h1>
+    <h1 data-l="he">כל טקסט הופך ל<mark>שיעור קריאה</mark></h1>
+    <p class="lead" data-l="en">Paste a text in any foreign language. Every word gets a pop-up translation, every sentence a translation you reveal when you want, and the class can follow on a projector. Free, and nothing to install.</p>
+    <p class="lead" data-l="he">מדביקים טקסט בכל שפה זרה. לכל מילה יש תרגום שקופץ כשמצביעים עליה, לכל משפט יש תרגום שחושפים מתי שרוצים, והכיתה יכולה לעקוב על מקרן. בחינם, ובלי להתקין כלום.</p>
+    <div class="buttons">
+      <a class="big open" href="tamlilon.html">
+        <span data-l="en">▶ Open Tamlilon</span><span data-l="he">◀ פתחו את תמלילון</span>
+        <small data-l="en">Use it right here. Nothing to install.</small><small data-l="he">משתמשים כאן ועכשיו. בלי התקנה.</small>
+      </a>
+      <a class="big dl" href="tamlilon.html" download="tamlilon.html">
+        <span data-l="en">⬇ Download</span><span data-l="he">⬇ הורדה</span>
+        <small data-l="en">One file. Double-click it to open.</small><small data-l="he">קובץ אחד. לחיצה כפולה פותחת אותו.</small>
+      </a>
+    </div>
+    <p class="note" data-l="en">For a computer (Windows or Mac) with Chrome, Edge, Safari or Firefox. The downloaded file works without internet.</p>
+    <p class="note" data-l="he">למחשב Windows או Mac, בדפדפן Chrome,‏ Edge,‏ Safari או Firefox. הקובץ שמורידים עובד גם בלי אינטרנט.</p>
+  </section>
+
+  <h2 data-l="en">How it works: 3 steps</h2><h2 data-l="he">איך זה עובד: 3 צעדים</h2>
+  <p class="sub" data-l="en">The tool guides you on the screen at every step.</p>
+  <p class="sub" data-l="he">הכלי מסביר על המסך מה לעשות בכל צעד. הכפתורים בכלי באנגלית; הטקסט והתרגומים יכולים להיות בכל שפה, גם בעברית.</p>
+
+  <div class="step">
+    <div>
+      <div class="num">1</div>
+      <h3 data-l="en">Open Tamlilon</h3><h3 data-l="he">פותחים את תמלילון</h3>
+      <p data-l="en">Click the big blue button above. Or click <b>Download</b> and double-click the file you got: it opens in your web browser.</p>
+      <p data-l="he">לוחצים על הכפתור הכחול הגדול למעלה. או לוחצים על <b>הורדה</b>, ואז לחיצה כפולה על הקובץ שהתקבל: הוא נפתח בדפדפן.</p>
+      <p data-l="en">Type a title and choose the languages.</p>
+      <p data-l="he">כותבים כותרת ובוחרים את השפות.</p>
+    </div>
+    <a href="assets/step1.jpg" title="See it bigger"><img src="assets/step1.jpg" width="1100" height="666" alt="Tamlilon open on the Setup tab: title and languages" loading="lazy"></a>
+  </div>
+
+  <div class="step">
+    <div>
+      <div class="num">2</div>
+      <h3 data-l="en">Paste your text, then let a free AI translate it</h3><h3 data-l="he">מדביקים את הטקסט, ובינה מלאכותית חינמית מתרגמת</h3>
+      <p data-l="en">Paste your text in the big box. Click <b class="ui">📋 Copy the next prompt</b>, paste it into a free AI chat (<a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a> or <a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini</a>) and send. Copy its answer and paste it back into Tamlilon.</p>
+      <p data-l="he">מדביקים את הטקסט בתיבה הגדולה. לוחצים <b class="ui" dir="ltr">📋 Copy the next prompt</b>, מדביקים בצ׳אט בינה מלאכותית חינמי, כמו <a href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT</a> או <a href="https://gemini.google.com" target="_blank" rel="noopener">Gemini</a>, ושולחים. מעתיקים את התשובה ומדביקים אותה בחזרה בתמלילון.</p>
+    </div>
+    <a href="assets/step2.jpg" title="See it bigger"><img src="assets/step2.jpg" width="1100" height="666" alt="Step 3 of the Setup tab: copy the prompt, paste the AI's answer, progress bars" loading="lazy"></a>
+  </div>
+
+  <div class="step">
+    <div>
+      <div class="num">3</div>
+      <h3 data-l="en">Save, and teach</h3><h3 data-l="he">שומרים, ומלמדים</h3>
+      <p data-l="en">Click <b class="ui">💾 Save</b>: your lesson becomes one file. Double-click it any time to open it again.</p>
+      <p data-l="he">לוחצים <b class="ui" dir="ltr">💾 Save</b>: השיעור נשמר כקובץ אחד. לחיצה כפולה עליו פותחת אותו שוב, מתי שרוצים.</p>
+      <p data-l="en">Rest the mouse on a word to see its meaning. Move with <kbd>→</kbd>. For the class, click <b class="ui">📽️ Class screen</b>.</p>
+      <p data-l="he">מצביעים בעכבר על מילה כדי לראות מה היא אומרת. עוברים משפט עם החץ <kbd>→</kbd>. לכיתה: <b class="ui" dir="ltr">📽️ Class screen</b>.</p>
+    </div>
+    <a href="assets/step3.jpg" title="See it bigger"><img src="assets/step3.jpg" width="1100" height="666" alt="A lesson: the current sentence highlighted, a word's pop-up translation, and the sentence's translation" loading="lazy"></a>
+  </div>
+
+  <h2 data-l="en">Good to know</h2><h2 data-l="he">כדאי לדעת</h2>
+  <div class="facts">
+    <div class="fact" data-l="en"><b>Free</b>No account, no payment. The AI chats it uses have free versions.</div>
+    <div class="fact" data-l="he"><b>בחינם</b>בלי חשבון ובלי תשלום. לצ׳אטים של הבינה המלאכותית יש גרסה חינמית.</div>
+    <div class="fact" data-l="en"><b>Your texts stay with you</b>Tamlilon sends nothing anywhere. Only what you paste into the AI chat yourself goes there.</div>
+    <div class="fact" data-l="he"><b>הטקסטים נשארים אצלכם</b>תמלילון לא שולח שום דבר לשום מקום. רק מה שאתם מדביקים בעצמכם בצ׳אט יוצא אליו.</div>
+    <div class="fact" data-l="en"><b>One file per lesson</b>Send it by e-mail, WhatsApp or USB with <b class="ui">📦 Package</b>: it opens by double-click on any computer.</div>
+    <div class="fact" data-l="he"><b>קובץ אחד לכל שיעור</b>אפשר לשלוח אותו במייל, בוואטסאפ או בדיסק און קי עם <b class="ui" dir="ltr">📦 Package</b>: הוא נפתח בלחיצה כפולה בכל מחשב.</div>
+    <div class="fact" data-l="en"><b>Help inside</b>Click <b class="ui">? Guide</b> in Tamlilon for the full step-by-step guide.</div>
+    <div class="fact" data-l="he"><b>עזרה בפנים</b>בתוך תמלילון, הכפתור <b class="ui" dir="ltr">? Guide</b> פותח מדריך מלא, צעד אחר צעד (באנגלית).</div>
+  </div>
+
+  <div class="again">
+    <div class="buttons">
+      <a class="big open" href="tamlilon.html"><span data-l="en">▶ Open Tamlilon</span><span data-l="he">◀ פתחו את תמלילון</span></a>
+    </div>
+  </div>
+
+  <footer>
+    <b>Tamlilon</b> · <span lang="he" dir="rtl">תמלילון</span><br>
+    <span data-l="en">Created by Dinmo · a Yours Truly project</span><span data-l="he">נוצר על ידי Dinmo · פרויקט של Yours Truly</span><br>
+    <span dir="ltr">© 2026 Dinmo (Yours Truly)</span> ·
+    <span data-l="en">Free software, <a href="https://github.com/Dinmo/tamlilon/blob/main/LICENSE">GPL-3.0 licence</a> · <a href="https://github.com/Dinmo/tamlilon">Source code</a></span><span data-l="he">תוכנה חופשית, <a href="https://github.com/Dinmo/tamlilon/blob/main/LICENSE">רישיון GPL-3.0</a> · <a href="https://github.com/Dinmo/tamlilon">קוד המקור</a></span>
+  </footer>
+</div>
+<script>
+(function(){
+  // Language: the one chosen before (if any), else Hebrew for a Hebrew browser, else English.
+  var saved=null; try{ saved=localStorage.getItem("tamlilon:site-lang"); }catch(e){}
+  var langs=(navigator.languages||[navigator.language||""]).join(",").toLowerCase();
+  function set(l,keep){
+    document.documentElement.lang=l; document.documentElement.dir=l==="he"?"rtl":"ltr";
+    var b=document.querySelectorAll(".lang button"); for(var i=0;i<b.length;i++) b[i].setAttribute("aria-pressed",String(b[i].getAttribute("data-set")===l));
+    if(keep) try{ localStorage.setItem("tamlilon:site-lang",l); }catch(e){}
+  }
+  var h=location.hash.slice(1);                                  // a link can ask for a language: …/#he or …/#en
+  set(h==="he"||h==="en"?h:saved==="he"||saved==="en"?saved:(/(^|,)(he|iw)\b/.test(langs)?"he":"en"));
+  var b=document.querySelectorAll(".lang button"); for(var i=0;i<b.length;i++) b[i].onclick=function(){ set(this.getAttribute("data-set"),true); };
+})();
+</script>
+</body>
+</html>
